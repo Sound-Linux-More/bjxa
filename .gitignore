@@ -1,0 +1,58 @@
+# gnu build system
+# ----------------
+
+.deps/
+.libs/
+autom4te.cache/
+build-aux/
+build/
+m4/
+
+*.la
+*.lo
+*.log
+*.o
+*.trs
+Makefile
+Makefile.in
+aclocal.m4
+config.h
+config.h.in
+config.log
+config.status
+configure
+libtool
+stamp-h1
+
+# programs
+# --------
+
+bjxa
+test/run.sh
+
+# manual
+# ------
+
+*.1
+*.3
+*.pdf
+
+# code coverage
+# -------------
+
+lcov/
+
+*.gcda
+*.gcno
+*.info
+gcov-tool.sh
+
+# packaging
+# ---------
+
+mockbuild/
+rpmbuild/
+
+*.pc
+*.spec
+bjxa-*.tar.gz
