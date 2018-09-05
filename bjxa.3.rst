@@ -13,15 +13,62 @@
 .. You should have received a copy of the GNU General Public License
 .. along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-====
-bjxa
-====
+=======
+libbjxa
+=======
 
 ------------------------------
 BandJAM XA audio codec library
 ------------------------------
 
+:Title upper: BJXA
 :Manual section: 3
+
+PROLOG
+======
+
+The goal of **libbjxa** is to provide a portable and clean interface to
+interact with BandJAM XA audio files. It provides a decoder that can convert
+any XA file to PCM streams of 16 bits samples.
+
+It is a replacement for the **xadec.dll** library that was shipped with
+BandJAM with a license allowing to use it for free of charge projects but its
+source code is unavailable and the Windows library only exists for 32 bit x86
+systems.
+
+SYNOPSIS
+========
+
+| **#include <bjxa.h>**
+|
+| **bjxa_decoder_t * bjxa_decoder(void)**
+| **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **)**
+
+DESCRIPTION
+===========
+
+**bjxa_decoder()** allocates a decoder for a single XA file at a time.
+
+**bjxa_free_decoder()** takes a pointer to a decoder, frees the decoder and
+clears the pointer.
+
+RETURN VALUE
+============
+
+On success, a scalar greater or equal to zero or a valid pointer is returned.
+
+On error, -1 or **NULL** is returned, and *errno* is set appropriately.
+
+ERRORS
+======
+
+**ENOMEM**
+
+	**bjxa_decoder()** could not allocate a decoder.
+
+**EINVAL**
+
+	*decp* was **NULL** or was not a pointer to a valid decoder.
 
 SEE ALSO
 ========

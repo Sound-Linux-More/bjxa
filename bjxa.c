@@ -15,11 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "bjxa.h"
 
 int
 main(void)
 {
+	bjxa_decoder_t *dec;
 
-	return (bjxa_dummy());
+	dec = bjxa_decoder();
+	if (dec == NULL) {
+		perror("bjxa_decoder");
+		return (EXIT_FAILURE);
+	}
+
+	if (bjxa_free_decoder(&dec) < 0) {
+		perror("bjxa_free_decoder");
+		return (EXIT_FAILURE);
+	}
+
+	return (EXIT_SUCCESS);
 }

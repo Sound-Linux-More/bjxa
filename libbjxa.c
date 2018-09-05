@@ -15,11 +15,66 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "bjxa.h"
 
-int
-bjxa_dummy(void)
-{
+#define ALLOC_OBJ(o, m) \
+	do { \
+		errno = 0; \
+		(o) = calloc(1, sizeof *(o)); \
+		if ((o) != NULL) \
+			(o)->magic = (m); \
+	} while (0)
 
+#define FREE_OBJ(o) \
+	do { \
+		(void)memset((o), 0, sizeof(*(o))); \
+		free(o); \
+		(o) = NULL; \
+	} while (0)
+
+#define CHECK_OBJ(o, m) \
+	do { \
+		if ((o) == NULL || (o)->magic != (m)) { \
+			errno = EINVAL; \
+			return (-1); \
+		} \
+	} while (0)
+
+#define TAKE_OBJ(o, p, m) \
+	do { \
+		if ((p) == NULL || *(p) == NULL || (*(p))->magic != (m)) { \
+			errno = EINVAL; \
+			return (-1); \
+		} \
+		o = *p; \
+		*p = NULL; \
+	} while (0)
+
+struct bjxa_decoder {
+	uint32_t		magic;
+#define BJXA_DECODER_MAGIC	0x234ec0c2
+};
+
+bjxa_decoder_t *
+bjxa_decoder(void)
+{
+	bjxa_decoder_t *dec;
+
+	ALLOC_OBJ(dec, BJXA_DECODER_MAGIC);
+	return (dec);
+}
+
+int
+bjxa_free_decoder(bjxa_decoder_t **decp)
+{
+	bjxa_decoder_t *dec;
+
+	TAKE_OBJ(dec, decp, BJXA_DECODER_MAGIC);
+	FREE_OBJ(dec);
 	return (0);
 }

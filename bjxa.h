@@ -15,4 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-int bjxa_dummy(void);
+typedef struct bjxa_decoder bjxa_decoder_t;
+
+bjxa_decoder_t * bjxa_decoder(void);
+int bjxa_free_decoder(bjxa_decoder_t **);
