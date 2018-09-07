@@ -82,10 +82,6 @@ bytes nevertheless.
 ERRORS
 ======
 
-**ENOMEM**
-
-	**bjxa_decoder()** could not allocate a decoder.
-
 **EINVAL**
 
 	*decp* is a null pointer or is not a pointer to a valid decoder.
@@ -104,6 +100,10 @@ ERRORS
 **ENODATA**
 
 	**bjxa_fread_header()** couldn't read a complete XA header.
+
+**ENOMEM**
+
+	**bjxa_decoder()** could not allocate a decoder.
 
 SEE ALSO
 ========
