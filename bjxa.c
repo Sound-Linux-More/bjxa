@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "bjxa.h"
 
@@ -29,6 +30,11 @@ main(void)
 	dec = bjxa_decoder();
 	if (dec == NULL) {
 		perror("bjxa_decoder");
+		return (EXIT_FAILURE);
+	}
+
+	if (bjxa_fread_header(dec, stdin) < 0) {
+		perror("bjxa_fread_header");
 		return (EXIT_FAILURE);
 	}
 

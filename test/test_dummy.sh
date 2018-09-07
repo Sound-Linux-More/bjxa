@@ -3,4 +3,4 @@
 set -e
 set -u
 
-bjxa
+! bjxa </dev/null

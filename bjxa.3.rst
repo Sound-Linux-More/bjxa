@@ -29,7 +29,7 @@ PROLOG
 
 The goal of **libbjxa** is to provide a portable and clean interface to
 interact with BandJAM XA audio files. It provides a decoder that can convert
-any XA file to PCM streams of 16 bits samples.
+any XA file to a PCM stream of 16 bits samples.
 
 It is a replacement for the **xadec.dll** library that was shipped with
 BandJAM with a license allowing to use it for free of charge projects but its
@@ -39,10 +39,19 @@ systems.
 SYNOPSIS
 ========
 
+| **#include <stdint.h>**
+| **#include <stdio.h>**
+| **#include <unistd.h>**
+|
 | **#include <bjxa.h>**
 |
-| **bjxa_decoder_t * bjxa_decoder(void)**
-| **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **)**
+| **bjxa_decoder_t * bjxa_decoder(void);**
+| **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **);**
+|
+| **ssize_t bjxa_parse_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **void \***\ *ptr*\ **, size_t** *len*\ **);**
+| **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **FILE \***\ *file*\ **);**
 
 DESCRIPTION
 ===========
@@ -52,12 +61,23 @@ DESCRIPTION
 **bjxa_free_decoder()** takes a pointer to a decoder, frees the decoder and
 clears the pointer.
 
+**bjxa_parse_header()** and **bjxa_fread_header()** parse the header of an XA
+file respectively from memory or from a file. On success, the decoder is ready
+to convert samples. A used decoder can parse a new XA header at any time, even
+in the middle of a conversion. The state of the decoder is updated only on
+success.
+
 RETURN VALUE
 ============
 
 On success, a scalar greater or equal to zero or a valid pointer is returned.
 
 On error, -1 or **NULL** is returned, and *errno* is set appropriately.
+
+**bjxa_parse_header()** and **bjxa_fread_header()** return the number of bytes
+read. On success this value is always 32 because XA files have a fixed-size
+header. On error, **bjxa_fread_header()** may have effectively read up to 32
+bytes nevertheless.
 
 ERRORS
 ======
@@ -68,7 +88,22 @@ ERRORS
 
 **EINVAL**
 
-	*decp* was **NULL** or was not a pointer to a valid decoder.
+	*decp* is a null pointer or is not a pointer to a valid decoder.
+
+	*dec* is null or not a valid decoder.
+
+	**bjxa_parse_header()** got a null *ptr*.
+
+	**bjxa_fread_header()** got a null *file*.
+
+**ENOBUFS**
+
+	**bjxa_parse_header()** got a *len* lower than 32, so the memory
+	buffer can't hold a complete XA header.
+
+**ENODATA**
+
+	**bjxa_fread_header()** couldn't read a complete XA header.
 
 SEE ALSO
 ========
