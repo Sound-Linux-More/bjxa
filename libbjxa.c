@@ -76,12 +76,6 @@
 
 /* error handling */
 
-#define BJXA_TRY(res) \
-	do { \
-		if ((res) < 0) \
-			return (-1); \
-	} while (0)
-
 #define BJXA_PROTO_CHECK(cond) \
 	do { \
 		if (!(cond)) { \
@@ -92,75 +86,52 @@
 
 /* little endian */
 
-static inline int
-fread_le(FILE *file, uint32_t *res, unsigned bits)
+static inline uint32_t
+mread_le(uint8_t **buf, unsigned bits)
 {
 	unsigned n = 0;
-	uint8_t u8;
+	uint32_t res = 0;
 
-	assert(file != NULL);
-	assert(res != NULL);
-	errno = 0;
-	*res = 0;
+	assert(buf != NULL);
+	assert(*buf != NULL);
 
-	while (n < bits && fread(&u8, 1, 1, file) == 1) {
-		*res |= (uint32_t)(u8 << n);
+	while (n < bits) {
+		res |= (uint32_t)(**buf << n);
+		*buf += 1;
 		n += 8;
 	}
 
-	if (n < bits) {
-		if (feof(file))
-			errno = ENODATA;
-		return (-1);
-	}
-
-	return (0);
+	return (res);
 }
 
-static int
-fread_le8(FILE *file, uint8_t *res)
+static uint8_t
+mread_le8(uint8_t **buf)
 {
-	uint32_t tmp;
-
-	assert(file != NULL);
-	assert(res != NULL);
+	uint32_t res;
 
 	/* NB: I know that byte order doesn't make sense for a single octet
-	 * but this makes the caller side cleaner, consistent, and shares the
-	 * error handling with the more legitimate functions.
+	 * but this is for consistency.
 	 */
-	if (fread_le(file, &tmp, 8) < 0)
-		return (-1);
-
-	assert(tmp <= UINT8_MAX);
-	*res = (uint8_t)tmp;
-	return (0);
+	res = mread_le(buf, 8);
+	assert(res <= UINT8_MAX);
+	return ((uint8_t)res);
 }
 
-static int
-fread_le16(FILE *file, uint16_t *res)
+static uint16_t
+mread_le16(uint8_t **buf)
 {
-	uint32_t tmp;
+	uint32_t res;
 
-	assert(file != NULL);
-	assert(res != NULL);
-
-	if (fread_le(file, &tmp, 16) < 0)
-		return (-1);
-
-	assert(tmp <= UINT16_MAX);
-	*res = (uint16_t)tmp;
-	return (0);
+	res = mread_le(buf, 16);
+	assert(res <= UINT16_MAX);
+	return ((uint16_t)res);
 }
 
-static int
-fread_le32(FILE *file, uint32_t *res)
+static uint32_t
+mread_le32(uint8_t **buf)
 {
 
-	assert(file != NULL);
-	assert(res != NULL);
-
-	return (fread_le(file, res, 32));
+	return (mread_le(buf, 32));
 }
 
 /* data structures */
@@ -209,8 +180,9 @@ bjxa_free_decoder(bjxa_decoder_t **decp)
 ssize_t
 bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 {
-	FILE *file;
-	ssize_t ret;
+	bjxa_decoder_t tmp;
+	uint32_t magic, pad, data_len, loop;
+	uint8_t *buf, bits;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(ptr);
@@ -220,55 +192,23 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 		return (-1);
 	}
 
-	errno = 0;
-	file = fmemopen(ptr, len, "r");
-	if (file == NULL) {
-		assert(errno != EINVAL);
-		return (-1);
-	}
-
-	/* NB: ISO C99 and POSIX.1 for some obscure and really hard to justify
-	 * reasons decided not to specify functions for big and little endian
-	 * conversions. This is especially hard since there is also neither
-	 * standardized or portable way to know the endianness of a host. But
-	 * of course your average libc has functions such as ntohs that
-	 * definitely prove that your average libc could ship with include
-	 * files advertising macros about the host byte order. In the absence
-	 * of such functions or macros, screw efficiency, and treat the memory
-	 * buffer as a file where it should really have been the other way
-	 * around with a single read followed by byte order adjustments.
-	 */
-	ret = bjxa_fread_header(dec, file);
-	if (ret < 0) {
-		assert(errno != EINVAL);
-		assert(errno != ENODATA);
-	}
-	(void)fclose(file);
-	return (ret);
-}
-
-ssize_t
-bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
-{
-	bjxa_decoder_t tmp;
-	uint32_t magic, pad, data_len;
-	uint8_t bits;
-
-	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
-	CHECK_PTR(file);
+	buf = ptr;
 
 	INIT_OBJ(&tmp, BJXA_DECODER_MAGIC);
-	BJXA_TRY(fread_le32(file, &magic));
-	BJXA_TRY(fread_le32(file, &tmp.data_len));
-	BJXA_TRY(fread_le32(file, &tmp.samples));
-	BJXA_TRY(fread_le16(file, &tmp.samples_rate));
-	BJXA_TRY(fread_le8(file, &bits));
-	BJXA_TRY(fread_le8(file, &tmp.channels));
-	BJXA_TRY(fread_le16(file, &tmp.channel_state[0].prev[0]));
-	BJXA_TRY(fread_le16(file, &tmp.channel_state[0].prev[1]));
-	BJXA_TRY(fread_le16(file, &tmp.channel_state[1].prev[0]));
-	BJXA_TRY(fread_le16(file, &tmp.channel_state[1].prev[1]));
-	BJXA_TRY(fread_le32(file, &pad));
+	magic = mread_le32(&buf);
+	tmp.data_len = mread_le32(&buf);
+	tmp.samples = mread_le32(&buf);
+	tmp.samples_rate = mread_le16(&buf);
+	bits = mread_le8(&buf);
+	tmp.channels = mread_le8(&buf);
+	loop = mread_le32(&buf);
+	tmp.channel_state[0].prev[0] = mread_le16(&buf);
+	tmp.channel_state[0].prev[1] = mread_le16(&buf);
+	tmp.channel_state[1].prev[0] = mread_le16(&buf);
+	tmp.channel_state[1].prev[1] = mread_le16(&buf);
+	pad = mread_le32(&buf);
+
+	assert((uintptr_t)buf - (uintptr_t)ptr == BJXA_HEADER_SIZE);
 
 	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
 	BJXA_PROTO_CHECK(bits == 4 || bits == 6 || bits == 8);
@@ -282,4 +222,27 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 
 	(void)memcpy(dec, &tmp, sizeof tmp);
 	return (BJXA_HEADER_SIZE);
+}
+
+ssize_t
+bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
+{
+	uint8_t buf[BJXA_HEADER_SIZE];
+	ssize_t ret;
+
+	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
+	CHECK_PTR(file);
+
+	if (fread(buf, sizeof buf, 1, file) != 1) {
+		if (feof(file))
+			errno = ENODATA;
+		return (-1);
+	}
+
+	ret = bjxa_parse_header(dec, buf, sizeof buf);
+	if (ret < 0) {
+		assert(errno != EINVAL);
+		assert(errno != ENOBUFS);
+	}
+	return (ret);
 }
