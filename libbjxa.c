@@ -74,15 +74,26 @@
 		*p = NULL; \
 	} while (0)
 
+#define VALID_OBJ(o, m) ((o) != NULL && (o)->magic == (m))
+
 /* error handling */
 
-#define BJXA_PROTO_CHECK(cond) \
+#define BJXA_TRY(res) \
+	do { \
+		if ((res) < 0) \
+			return (-1); \
+	} while (0)
+
+#define BJXA_COND_CHECK(cond, err) \
 	do { \
 		if (!(cond)) { \
-			errno = EPROTO; \
+			errno = (err); \
 			return (-1); \
 		} \
 	} while (0)
+
+#define BJXA_BUFFER_CHECK(cond) BJXA_COND_CHECK((cond), ENOBUFS)
+#define BJXA_PROTO_CHECK(cond) BJXA_COND_CHECK((cond), EPROTO)
 
 /* little endian */
 
@@ -138,9 +149,12 @@ mread_le32(uint8_t **buf)
 
 #define BJXA_HEADER_MAGIC	0x3144574b
 #define BJXA_HEADER_SIZE	32
+#define BJXA_BLOCK_SAMPLES	32
+
+typedef uint8_t bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
 
 typedef struct {
-	uint16_t	prev[2];
+	int16_t			prev[2];
 } bjxa_channel_t;
 
 struct bjxa_decoder {
@@ -152,6 +166,7 @@ struct bjxa_decoder {
 	uint8_t			block_size;
 	uint8_t			channels;
 	bjxa_channel_t		channel_state[2];
+	bjxa_inflate_f		*inflate_cb;
 };
 
 /* memory management */
@@ -175,6 +190,81 @@ bjxa_free_decoder(bjxa_decoder_t **decp)
 	return (0);
 }
 
+/* inflate XA blocks */
+
+static uint8_t
+bjxa_inflate_4bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+{
+	unsigned n, chan;
+	uint8_t profile;
+
+	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
+	assert(dec->channels == 1 || dec->channels == 2);
+
+	chan = dec->channels;
+	profile = *src;
+	src++;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 2) {
+		*dst = (int16_t)((src[0] & 0xf0) << 8);  dst += chan;
+		*dst = (int16_t)((src[0] & 0x0f) << 12); dst += chan;
+		src++;
+	}
+
+	return (profile);
+}
+
+static uint8_t
+bjxa_inflate_6bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+{
+	unsigned n, chan;
+	uint32_t samples;
+	uint8_t profile;
+
+	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
+	assert(dec->channels == 1 || dec->channels == 2);
+
+	chan = dec->channels;
+	profile = *src;
+	src++;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 4) {
+		samples = (uint32_t)(src[0] << 16) | (uint32_t)(src[1] << 8) |
+		    src[2];
+
+		*dst = (int16_t)((samples & 0x00fc0000) >> 8);  dst += chan;
+		*dst = (int16_t)((samples & 0x0003f000) >> 2);  dst += chan;
+		*dst = (int16_t)((samples & 0x00000fc0) << 4);  dst += chan;
+		*dst = (int16_t)((samples & 0x0000003f) << 10); dst += chan;
+
+		src += 3;
+	}
+
+	return (profile);
+}
+
+static uint8_t
+bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+{
+	unsigned n, chan;
+	uint8_t profile;
+
+	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
+	assert(dec->channels == 1 || dec->channels == 2);
+
+	chan = dec->channels;
+	profile = *src;
+	src++;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n--) {
+		*dst = (int16_t)(src[0] << 8);
+		dst += chan;
+		src++;
+	}
+
+	return (profile);
+}
+
 /* XA header */
 
 ssize_t
@@ -186,11 +276,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(ptr);
-
-	if (len < BJXA_HEADER_SIZE) {
-		errno = ENOBUFS;
-		return (-1);
-	}
+	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE);
 
 	buf = ptr;
 
@@ -202,10 +288,10 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 	bits = mread_le8(&buf);
 	tmp.channels = mread_le8(&buf);
 	loop = mread_le32(&buf);
-	tmp.channel_state[0].prev[0] = mread_le16(&buf);
-	tmp.channel_state[0].prev[1] = mread_le16(&buf);
-	tmp.channel_state[1].prev[0] = mread_le16(&buf);
-	tmp.channel_state[1].prev[1] = mread_le16(&buf);
+	tmp.channel_state[0].prev[0] = (int16_t)mread_le16(&buf);
+	tmp.channel_state[0].prev[1] = (int16_t)mread_le16(&buf);
+	tmp.channel_state[1].prev[0] = (int16_t)mread_le16(&buf);
+	tmp.channel_state[1].prev[1] = (int16_t)mread_le16(&buf);
 	pad = mread_le32(&buf);
 
 	assert((uintptr_t)buf - (uintptr_t)ptr == BJXA_HEADER_SIZE);
@@ -219,6 +305,13 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 	data_len = (tmp.samples >> 5) * tmp.channels * tmp.block_size;
 
 	BJXA_PROTO_CHECK(tmp.data_len == data_len);
+
+	if (bits == 4)
+		tmp.inflate_cb = bjxa_inflate_4bits;
+	else if (bits == 6)
+		tmp.inflate_cb = bjxa_inflate_6bits;
+	else if (bits == 8)
+		tmp.inflate_cb = bjxa_inflate_8bits;
 
 	(void)memcpy(dec, &tmp, sizeof tmp);
 	return (BJXA_HEADER_SIZE);
@@ -245,4 +338,125 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 		assert(errno != ENOBUFS);
 	}
 	return (ret);
+}
+
+/* decode XA blocks */
+
+static const int16_t spread_factor[][2] = {
+	{0x0000, 0x0000},
+	{0x00f0, 0x0000},
+	{0x01cc, 0x00d0},
+	{0x0188, 0x00dc},
+	{0x01e8, 0x00f0},
+};
+
+static int
+bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
+    unsigned chan)
+{
+	bjxa_channel_t *state;
+	int32_t spread;
+	int16_t sample, sf0, sf1;
+	uint8_t shr, idx;
+	unsigned len, inc;
+
+	assert(chan == 0 || chan == 1);
+
+	len = BJXA_BLOCK_SAMPLES;
+	inc = dec->channels;
+	idx = profile >> 4;
+	shr = profile & 0x0f;
+
+	BJXA_PROTO_CHECK(idx < 6);
+
+	state = &dec->channel_state[chan];
+	sf0 = spread_factor[idx][0];
+	sf1 = spread_factor[idx][1];
+
+	while (len > 0) {
+		sample = *dst >> shr;
+		spread = (state->prev[0] * sf0) - (state->prev[1] * sf1);
+
+		if (spread < 0)
+			spread += 0xff;
+
+		*dst = (int16_t)(sample + spread / 256);
+		state->prev[1] = state->prev[0];
+		state->prev[0] = *dst;
+
+		dst += inc;
+		len--;
+	}
+
+	return (0);
+}
+
+int
+bjxa_decode_format(bjxa_decoder_t *dec, bjxa_format_t *fmt)
+{
+
+	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
+	CHECK_PTR(fmt);
+	if (dec->block_size == 0) {
+		errno = EINVAL;
+		return (-1);
+	}
+
+	fmt->samples_rate = dec->samples_rate;
+	fmt->sample_bits = 16;
+	fmt->channels = dec->channels;
+	fmt->block_size_xa = dec->block_size * dec->channels;
+	fmt->block_size_pcm = BJXA_BLOCK_SAMPLES * dec->channels *
+	    sizeof(int16_t);
+	fmt->blocks = dec->data_len / fmt->block_size_xa;
+
+	assert(fmt->blocks * fmt->block_size_xa == dec->data_len);
+
+	return (0);
+}
+
+int
+bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
+    size_t src_len)
+{
+	bjxa_format_t fmt;
+	const uint8_t *src_ptr;
+	int16_t *dst_ptr;
+	uint8_t profile;
+	int blocks = 0;
+
+	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
+	CHECK_PTR(dst);
+	CHECK_PTR(src);
+	BJXA_TRY(bjxa_decode_format(dec, &fmt));
+
+	BJXA_BUFFER_CHECK(dst_len >= fmt.block_size_pcm);
+	BJXA_BUFFER_CHECK(src_len >= fmt.block_size_xa);
+
+	dst_ptr = dst;
+	src_ptr = src;
+
+	while (dst_len >= fmt.block_size_pcm &&
+	    src_len >= fmt.block_size_xa) {
+
+		profile = dec->inflate_cb(dec, dst_ptr, src_ptr);
+		BJXA_TRY(bjxa_decode_inflated(dec, dst_ptr, profile, 0));
+
+		src_ptr += dec->block_size;
+		src_len -= dec->block_size;
+
+		if (dec->channels == 2) {
+			profile = dec->inflate_cb(dec, dst_ptr + 1, src_ptr);
+			BJXA_TRY(bjxa_decode_inflated(dec, dst_ptr + 1,
+			    profile, 1));
+			src_ptr += dec->block_size;
+			src_len -= dec->block_size;
+		}
+
+		dst_ptr += BJXA_BLOCK_SAMPLES * dec->channels;
+		dst_len -= fmt.block_size_pcm;
+		blocks++;
+	}
+
+	return (blocks);
 }

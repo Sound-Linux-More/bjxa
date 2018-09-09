@@ -22,10 +22,65 @@
 
 #include "bjxa.h"
 
+static int
+decode(bjxa_decoder_t *dec)
+{
+	bjxa_format_t fmt;
+	void *buf_pcm, *buf_xa;
+	int ret = 0;
+
+	if (bjxa_fread_header(dec, stdin) < 0) {
+		perror("bjxa_fread_header");
+		return (-1);
+	}
+
+	if (bjxa_decode_format(dec, &fmt) < 0) {
+		perror("bjxa_decode_format");
+		return (-1);
+	}
+
+	/* allocate space for exactly one block */
+	buf_pcm = malloc(fmt.block_size_pcm);
+	buf_xa = malloc(fmt.block_size_xa);
+
+	if (buf_pcm == NULL || buf_xa == NULL) {
+		perror("malloc");
+		ret = -1;
+	}
+
+	while (fmt.blocks > 0 && ret == 0) {
+		if (fread(buf_xa, fmt.block_size_xa, 1, stdin) != 1) {
+			perror("fread");
+			ret = -1;
+			break;
+		}
+
+		if (bjxa_decode(dec, buf_pcm, fmt.block_size_pcm, buf_xa,
+		    fmt.block_size_xa) != 1) {
+			perror("bjxa_decode");
+			ret = -1;
+			break;
+		}
+
+		if (fwrite(buf_pcm, fmt.block_size_pcm, 1, stdout) != 1) {
+			perror("fwrite");
+			ret = -1;
+			break;
+		}
+
+		fmt.blocks--;
+	}
+
+	free(buf_pcm);
+	free(buf_xa);
+	return (ret);
+}
+
 int
 main(void)
 {
 	bjxa_decoder_t *dec;
+	int status = EXIT_SUCCESS;
 
 	dec = bjxa_decoder();
 	if (dec == NULL) {
@@ -33,15 +88,13 @@ main(void)
 		return (EXIT_FAILURE);
 	}
 
-	if (bjxa_fread_header(dec, stdin) < 0) {
-		perror("bjxa_fread_header");
-		return (EXIT_FAILURE);
-	}
+	if (decode(dec) < 0)
+		status = EXIT_FAILURE;
 
 	if (bjxa_free_decoder(&dec) < 0) {
 		perror("bjxa_free_decoder");
-		return (EXIT_FAILURE);
+		status = EXIT_FAILURE;
 	}
 
-	return (EXIT_SUCCESS);
+	return (status);
 }

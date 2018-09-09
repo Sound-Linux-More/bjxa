@@ -17,8 +17,20 @@
 
 typedef struct bjxa_decoder bjxa_decoder_t;
 
+typedef struct {
+	uint32_t	blocks;
+	uint8_t		block_size_pcm;
+	uint8_t		block_size_xa;
+	uint16_t	samples_rate;
+	uint8_t		sample_bits;
+	uint8_t		channels;
+} bjxa_format_t;
+
 bjxa_decoder_t * bjxa_decoder(void);
 int bjxa_free_decoder(bjxa_decoder_t **);
 
 ssize_t bjxa_parse_header(bjxa_decoder_t *, void *, size_t);
 ssize_t bjxa_fread_header(bjxa_decoder_t *, FILE *);
+
+int bjxa_decode_format(bjxa_decoder_t *, bjxa_format_t *);
+int bjxa_decode(bjxa_decoder_t *, void *, size_t, const void *, size_t);

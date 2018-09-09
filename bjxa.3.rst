@@ -45,6 +45,15 @@ SYNOPSIS
 |
 | **#include <bjxa.h>**
 |
+| **typedef struct {**
+|     **uint32_t    blocks;**
+|     **uint8_t     block_size_pcm;**
+|     **uint8_t     block_size_xa;**
+|     **uint16_t    samples_rate;**
+|     **uint8_t     sample_bits;**
+|     **uint8_t     channels;**
+| **} bjxa_format_t;**
+|
 | **bjxa_decoder_t * bjxa_decoder(void);**
 | **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **);**
 |
@@ -52,6 +61,12 @@ SYNOPSIS
       **void \***\ *ptr*\ **, size_t** *len*\ **);**
 | **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
+|
+| **int bjxa_decode_format(bjxa_decoder_t \***\ *dec*\ **,** \
+      **bjxa_format_t \***\ *fmt*\ **);**
+| **int bjxa_decode(bjxa_decoder_t \***\ *dec*\ **,** \
+      **void \***\ *dst*\ **, size_t** *dst_len*\ **,** \
+      **const void \***\ *src*\ **, size_t** *src_len*\ **);**
 
 DESCRIPTION
 ===========
@@ -67,6 +82,16 @@ to convert samples. A used decoder can parse a new XA header at any time, even
 in the middle of a conversion. The state of the decoder is updated only on
 success.
 
+**bjxa_decode_format()** takes a decoder in a ready state and fills a
+**bjxa_format_t** structure with information about the XA file. This
+information can then be used to drive the decoding using **bjxa_decode()**.
+
+**bjxa_decode()** decodes XA blocks read from *src* to PCM samples written to
+*dst*. Stereo PCM samples are interleaved and both channels interpreted as a
+single block. The number of blocks reported by **bjxa_format_t** are effective
+blocks, meaning that two XA blocks needed to decode one stereo PCM "block" is
+considered a single block because of the interleaving.
+
 RETURN VALUE
 ============
 
@@ -78,6 +103,8 @@ On error, -1 or **NULL** is returned, and *errno* is set appropriately.
 read. On success this value is always 32 because XA files have a fixed-size
 header. On error, **bjxa_fread_header()** may have effectively read up to 32
 bytes nevertheless.
+
+**bjxa_decode()** returns the number of effective blocks decoded.
 
 ERRORS
 ======
@@ -92,10 +119,26 @@ ERRORS
 
 	**bjxa_fread_header()** got a null *file*.
 
+	**bjxa_decode_format()** got a *dec* not in a ready state.
+
+	**bjxa_decode_format()** got a null *fmt*.
+
+	**bjxa_decode()** got a *dec* not in a ready state.
+
+	**bjxa_decode()** got a null *dst*.
+
+	**bjxa_decode()** got a null *src*.
+
 **ENOBUFS**
 
 	**bjxa_parse_header()** got a *len* lower than 32, so the memory
 	buffer can't hold a complete XA header.
+
+	**bjxa_decode()** got a *dst_len* lower than *block_size_pcm*, so the
+	memory buffer *dst* can't hold a complete PCM block.
+
+	**bjxa_decode()** got a *src_len* lower than *block_size_xa*, so the
+	memory buffer *src* can't hold a complete XA block.
 
 **ENODATA**
 
@@ -104,6 +147,10 @@ ERRORS
 **ENOMEM**
 
 	**bjxa_decoder()** could not allocate a decoder.
+
+**EPROTO**
+
+	**bjxa_decode()** got an invalid XA block.
 
 SEE ALSO
 ========
