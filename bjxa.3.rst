@@ -45,6 +45,8 @@ SYNOPSIS
 |
 | **#include <bjxa.h>**
 |
+| **typedef struct bjxa_decoder bjxa_decoder_t;**
+|
 | **typedef struct {**
 |     **uint32_t    blocks;**
 |     **uint8_t     block_size_pcm;**
@@ -79,8 +81,8 @@ clears the pointer.
 **bjxa_parse_header()** and **bjxa_fread_header()** parse the header of an XA
 file respectively from memory or from a file. On success, the decoder is ready
 to convert samples. A used decoder can parse a new XA header at any time, even
-in the middle of a conversion. The state of the decoder is updated only on
-success.
+in the middle of a conversion. The state of the decoder is updated atomically
+only on success.
 
 **bjxa_decode_format()** takes a decoder in a ready state and fills a
 **bjxa_format_t** structure with information about the XA file. This
@@ -96,13 +98,15 @@ RETURN VALUE
 ============
 
 On success, a scalar greater or equal to zero or a valid pointer is returned.
+A function returns either zero or a value greater than zero on success, so
+only functions where the return value means more than just success are
+described below.
 
 On error, -1 or **NULL** is returned, and *errno* is set appropriately.
 
 **bjxa_parse_header()** and **bjxa_fread_header()** return the number of bytes
 read. On success this value is always 32 because XA files have a fixed-size
-header. On error, **bjxa_fread_header()** may have effectively read up to 32
-bytes nevertheless.
+header.
 
 **bjxa_decode()** returns the number of effective blocks decoded.
 
@@ -142,13 +146,17 @@ ERRORS
 
 **ENODATA**
 
-	**bjxa_fread_header()** couldn't read a complete XA header.
+	**bjxa_fread_header()** could not read a complete XA header.
 
 **ENOMEM**
 
 	**bjxa_decoder()** could not allocate a decoder.
 
 **EPROTO**
+
+	**bjxa_parse_header()** could not parse a valid XA header.
+
+	**bjxa_fread_header()** could not parse a valid XA header.
 
 	**bjxa_decode()** got an invalid XA block.
 
