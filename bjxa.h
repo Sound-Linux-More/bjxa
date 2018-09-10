@@ -18,6 +18,7 @@
 typedef struct bjxa_decoder bjxa_decoder_t;
 
 typedef struct {
+	uint32_t	data_len_pcm;
 	uint32_t	blocks;
 	uint8_t		block_size_pcm;
 	uint8_t		block_size_xa;

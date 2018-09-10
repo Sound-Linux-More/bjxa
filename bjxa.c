@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +28,7 @@ decode(bjxa_decoder_t *dec)
 {
 	bjxa_format_t fmt;
 	void *buf_pcm, *buf_xa;
+	uint32_t pcm_block;
 	int ret = 0;
 
 	if (bjxa_fread_header(dec, stdin) < 0) {
@@ -62,14 +64,21 @@ decode(bjxa_decoder_t *dec)
 			break;
 		}
 
-		if (fwrite(buf_pcm, fmt.block_size_pcm, 1, stdout) != 1) {
+		pcm_block = fmt.block_size_pcm;
+		if (pcm_block > fmt.data_len_pcm)
+			pcm_block = fmt.data_len_pcm;
+
+		if (fwrite(buf_pcm, pcm_block, 1, stdout) != 1) {
 			perror("fwrite");
 			ret = -1;
 			break;
 		}
 
+		fmt.data_len_pcm -= pcm_block;
 		fmt.blocks--;
 	}
+
+	assert(fmt.data_len_pcm == 0);
 
 	free(buf_pcm);
 	free(buf_xa);

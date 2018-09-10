@@ -48,6 +48,7 @@ SYNOPSIS
 | **typedef struct bjxa_decoder bjxa_decoder_t;**
 |
 | **typedef struct {**
+|     **uint32_t    data_len_pcm;**
 |     **uint32_t    blocks;**
 |     **uint8_t     block_size_pcm;**
 |     **uint8_t     block_size_xa;**
@@ -92,7 +93,10 @@ information can then be used to drive the decoding using **bjxa_decode()**.
 *dst*. Stereo PCM samples are interleaved and both channels interpreted as a
 single block. The number of blocks reported by **bjxa_format_t** are effective
 blocks, meaning that two XA blocks needed to decode one stereo PCM "block" is
-considered a single block because of the interleaving.
+considered a single block because of the interleaving. The last PCM block may
+be truncated if the number of remaining samples is less than the contents of a
+full XA block. The field *data_len_pcm* can be used to keep track of how many
+bytes were decoded over iterations.
 
 RETURN VALUE
 ============

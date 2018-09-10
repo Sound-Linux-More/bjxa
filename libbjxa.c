@@ -271,7 +271,7 @@ ssize_t
 bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 {
 	bjxa_decoder_t tmp;
-	uint32_t magic, pad, data_len, loop;
+	uint32_t magic, pad, max_samples, loop;
 	uint8_t *buf, bits;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
@@ -299,12 +299,12 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
 	BJXA_PROTO_CHECK(bits == 4 || bits == 6 || bits == 8);
 	BJXA_PROTO_CHECK(tmp.channels == 1 || tmp.channels == 2);
-	BJXA_PROTO_CHECK((tmp.samples & 0x1f) == 0);
 
 	tmp.block_size = bits * 4 + 1;
-	data_len = (tmp.samples >> 5) * tmp.channels * tmp.block_size;
-
-	BJXA_PROTO_CHECK(tmp.data_len == data_len);
+	max_samples = (BJXA_BLOCK_SAMPLES * tmp.data_len) /
+	    (tmp.block_size * tmp.channels);
+	BJXA_PROTO_CHECK(max_samples >= tmp.samples);
+	BJXA_PROTO_CHECK(max_samples - tmp.samples < BJXA_BLOCK_SAMPLES);
 
 	if (bits == 4)
 		tmp.inflate_cb = bjxa_inflate_4bits;
@@ -402,6 +402,7 @@ bjxa_decode_format(bjxa_decoder_t *dec, bjxa_format_t *fmt)
 		return (-1);
 	}
 
+	fmt->data_len_pcm = dec->samples * dec->channels * sizeof(int16_t);
 	fmt->samples_rate = dec->samples_rate;
 	fmt->sample_bits = 16;
 	fmt->channels = dec->channels;
