@@ -52,4 +52,32 @@ expect_error() {
 		echo "expect_error: message not found: $msg" >&2
 		return 1
 	fi
+	echo "expect_error ok: $msg"
+}
+
+sha1() {
+	case ${SHA1:-} in
+		sha1sum) sha1sum "$1" ;;
+		sha1) command sha1 -r "$1" ;;
+		*) ${SHA1:-sha1sum} "$1" ;;
+	esac |
+	awk '{print $1}'
+}
+
+expect_sha1() {
+	expect=$1
+	shift
+	if ! "$@" >"$WORK_DIR"/stdout 2>"$WORK_DIR"/stderr
+	then
+		echo "expect_sha1: command failed" >&2
+		cat "$WORK_DIR"/stderr >&2
+		return 1
+	fi
+	actual=$(sha1 "$WORK_DIR"/stdout)
+	if [ "$expect" != "$actual" ]
+	then
+		echo "expect_sha1: expected $expect got $actual" >&2
+		return 1
+	fi
+	echo "expect_sha1 ok: $expect"
 }

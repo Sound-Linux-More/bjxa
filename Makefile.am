@@ -75,6 +75,7 @@ endif
 LOG_COMPILER = ./test/run.sh
 
 TESTS = \
+	test/test_decode.sh \
 	test/test_decode_error.sh
 
 # Distribution
@@ -86,6 +87,7 @@ DISTCLEANFILES = $(nobase_nodist_noinst_SCRIPTS)
 
 EXTRA_DIST = \
 	$(TESTS) \
+	$(srcdir)/test/*.xa \
 	bjxa.1.rst \
 	bjxa.3.rst \
 	bjxa.spec \
