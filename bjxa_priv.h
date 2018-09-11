@@ -15,21 +15,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "bjxa.h"
-#include "bjxa_priv.h"
-
-int
-main(void)
-{
-
-	if (decode(stdin, stdout) < 0)
-		return (EXIT_FAILURE);
-
-	return (EXIT_SUCCESS);
-}
+int decode(FILE *, FILE *);

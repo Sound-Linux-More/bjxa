@@ -39,7 +39,9 @@ CONFIG_SUFFIXES = .sh.in .sh
 lib_LTLIBRARIES = libbjxa.la
 bin_PROGRAMS = bjxa
 include_HEADERS = bjxa.h
+noinst_HEADERS = bjxa_priv.h
 
+bjxa_SOURCES = bjxa.c bjxa_decode.c
 bjxa_LDADD = libbjxa.la
 
 # Packaging
