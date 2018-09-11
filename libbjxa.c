@@ -343,6 +343,9 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 	else if (bits == 8)
 		tmp.inflate_cb = bjxa_inflate_8bits;
 
+	(void)loop;
+	(void)pad;
+
 	(void)memcpy(dec, &tmp, sizeof tmp);
 	return (BJXA_HEADER_SIZE);
 }

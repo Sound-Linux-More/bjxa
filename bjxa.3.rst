@@ -187,6 +187,11 @@ ERRORS
 
 	**bjxa_decode()** got an invalid XA block.
 
+BUGS
+====
+
+**libbjxa** does not support the *nLoopPtr* field from the XA file header.
+
 SEE ALSO
 ========
 
