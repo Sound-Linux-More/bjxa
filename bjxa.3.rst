@@ -124,7 +124,9 @@ header.
 **bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** return the
 number of bytes written.
 
-**bjxa_decode()** returns the number of effective blocks decoded.
+**bjxa_decode()** returns the number of effective blocks decoded. The number
+of bytes read from *src* and written to *dst* can be computed using the
+*block_size_xa* and *block_size_pcm* fields.
 
 ERRORS
 ======
