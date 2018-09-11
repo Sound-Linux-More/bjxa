@@ -24,14 +24,14 @@
 #include "bjxa.h"
 
 static int
-decode(bjxa_decoder_t *dec)
+decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 {
 	bjxa_format_t fmt;
 	void *buf_pcm, *buf_xa;
 	uint32_t pcm_block;
 	int ret = 0;
 
-	if (bjxa_fread_header(dec, stdin) < 0) {
+	if (bjxa_fread_header(dec, in) < 0) {
 		perror("bjxa_fread_header");
 		return (-1);
 	}
@@ -50,13 +50,13 @@ decode(bjxa_decoder_t *dec)
 		ret = -1;
 	}
 
-	if (bjxa_fwrite_riff_header(dec, stdout) < 0) {
+	if (bjxa_fwrite_riff_header(dec, out) < 0) {
 		perror("bjxa_fwrite_riff_header");
 		ret = -1;
 	}
 
 	while (fmt.blocks > 0 && ret == 0) {
-		if (fread(buf_xa, fmt.block_size_xa, 1, stdin) != 1) {
+		if (fread(buf_xa, fmt.block_size_xa, 1, in) != 1) {
 			perror("fread");
 			ret = -1;
 			break;
@@ -73,7 +73,7 @@ decode(bjxa_decoder_t *dec)
 		if (pcm_block > fmt.data_len_pcm)
 			pcm_block = fmt.data_len_pcm;
 
-		if (fwrite(buf_pcm, pcm_block, 1, stdout) != 1) {
+		if (fwrite(buf_pcm, pcm_block, 1, out) != 1) {
 			perror("fwrite");
 			ret = -1;
 			break;
@@ -90,25 +90,35 @@ decode(bjxa_decoder_t *dec)
 	return (ret);
 }
 
-int
-main(void)
+static int
+decode(FILE *in, FILE *out)
 {
 	bjxa_decoder_t *dec;
-	int status = EXIT_SUCCESS;
+	int status = 0;
 
 	dec = bjxa_decoder();
 	if (dec == NULL) {
 		perror("bjxa_decoder");
-		return (EXIT_FAILURE);
+		return (-1);
 	}
 
-	if (decode(dec) < 0)
-		status = EXIT_FAILURE;
+	if (decode_loop(dec, in, out) < 0)
+		status = -1;
 
 	if (bjxa_free_decoder(&dec) < 0) {
 		perror("bjxa_free_decoder");
-		status = EXIT_FAILURE;
+		status = -1;
 	}
 
 	return (status);
+}
+
+int
+main(void)
+{
+
+	if (decode(stdin, stdout) < 0)
+		return (EXIT_FAILURE);
+
+	return (EXIT_SUCCESS);
 }
