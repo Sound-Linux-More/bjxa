@@ -61,7 +61,7 @@ SYNOPSIS
 | **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **);**
 |
 | **ssize_t bjxa_parse_header(bjxa_decoder_t \***\ *dec*\ **,** \
-      **void \***\ *ptr*\ **, size_t** *len*\ **);**
+      **void \***\ *src*\ **, size_t** *len*\ **);**
 | **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
 |
@@ -137,7 +137,7 @@ ERRORS
 
 	*dec* is null or not a valid decoder.
 
-	**bjxa_parse_header()** got a null *ptr*.
+	**bjxa_parse_header()** got a null *src*.
 
 	**bjxa_fread_header()** got a null *file*.
 

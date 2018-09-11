@@ -298,17 +298,17 @@ bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 /* XA header */
 
 ssize_t
-bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
+bjxa_parse_header(bjxa_decoder_t *dec, void *src, size_t len)
 {
 	bjxa_decoder_t tmp;
 	uint32_t magic, pad, max_samples, loop;
 	uint8_t *buf, bits;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
-	CHECK_PTR(ptr);
+	CHECK_PTR(src);
 	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE);
 
-	buf = ptr;
+	buf = src;
 
 	INIT_OBJ(&tmp, BJXA_DECODER_MAGIC);
 	magic = mread_le32(&buf);
@@ -324,7 +324,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, void *ptr, size_t len)
 	tmp.channel_state[1].prev[1] = (int16_t)mread_le16(&buf);
 	pad = mread_le32(&buf);
 
-	assert((uintptr_t)buf - (uintptr_t)ptr == BJXA_HEADER_SIZE);
+	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE);
 
 	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
 	BJXA_PROTO_CHECK(bits == 4 || bits == 6 || bits == 8);
