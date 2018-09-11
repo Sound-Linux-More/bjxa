@@ -56,13 +56,18 @@ dist_doc_DATA = README.rst
 dist_man_MANS = bjxa.1 bjxa.3
 
 if DOCS
-DOCS_SUFFIXES = .1 .3 .1.rst .3.rst
+DOCS_SUFFIXES = .1 .3 .1.rst .3.rst .c .c.txt
+
+.c.c.txt:
+	$(srcdir)/strip-c-source.sh $< $@
 
 .1.rst.1:
 	$(AM_V_GEN) $(RST2MAN) $< $@
 
 .3.rst.3:
 	$(AM_V_GEN) $(RST2MAN) $< $@
+
+bjxa.3: bjxa_decode.c.txt
 endif
 
 # Test suite
@@ -85,4 +90,5 @@ EXTRA_DIST = \
 	bjxa.3.rst \
 	bjxa.spec \
 	gcov-tool.sh.in \
+	strip-c-source.sh \
 	test/run.sh.in

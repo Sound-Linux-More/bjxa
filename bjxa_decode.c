@@ -22,7 +22,10 @@
 #include <unistd.h>
 
 #include "bjxa.h"
+
+/* begin strip */
 #include "bjxa_priv.h"
+/* end strip */
 
 static int
 decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)

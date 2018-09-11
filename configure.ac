@@ -161,6 +161,7 @@ fi
 # Configured files
 AC_CONFIG_FILES([
 	Makefile
+	bjxa.3.rst
 	bjxa.pc
 	bjxa.spec
 ])
