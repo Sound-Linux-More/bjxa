@@ -61,7 +61,7 @@ SYNOPSIS
 | **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **);**
 |
 | **ssize_t bjxa_parse_header(bjxa_decoder_t \***\ *dec*\ **,** \
-      **void \***\ *src*\ **, size_t** *len*\ **);**
+      **const void \***\ *src*\ **, size_t** *len*\ **);**
 | **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
 |

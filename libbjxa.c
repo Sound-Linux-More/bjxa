@@ -98,7 +98,7 @@
 /* little endian */
 
 static inline uint32_t
-mread_le(uint8_t **buf, unsigned bits)
+mread_le(const uint8_t **buf, unsigned bits)
 {
 	unsigned n = 0;
 	uint32_t res = 0;
@@ -116,7 +116,7 @@ mread_le(uint8_t **buf, unsigned bits)
 }
 
 static uint8_t
-mread_le8(uint8_t **buf)
+mread_le8(const uint8_t **buf)
 {
 	uint32_t res;
 
@@ -129,7 +129,7 @@ mread_le8(uint8_t **buf)
 }
 
 static uint16_t
-mread_le16(uint8_t **buf)
+mread_le16(const uint8_t **buf)
 {
 	uint32_t res;
 
@@ -139,7 +139,7 @@ mread_le16(uint8_t **buf)
 }
 
 static uint32_t
-mread_le32(uint8_t **buf)
+mread_le32(const uint8_t **buf)
 {
 
 	return (mread_le(buf, 32));
@@ -298,11 +298,12 @@ bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 /* XA header */
 
 ssize_t
-bjxa_parse_header(bjxa_decoder_t *dec, void *src, size_t len)
+bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 {
 	bjxa_decoder_t tmp;
 	uint32_t magic, pad, max_samples, loop;
-	uint8_t *buf, bits;
+	const uint8_t *buf;
+	uint8_t bits;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(src);

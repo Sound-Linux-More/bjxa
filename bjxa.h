@@ -30,7 +30,7 @@ typedef struct {
 bjxa_decoder_t * bjxa_decoder(void);
 int bjxa_free_decoder(bjxa_decoder_t **);
 
-ssize_t bjxa_parse_header(bjxa_decoder_t *, void *, size_t);
+ssize_t bjxa_parse_header(bjxa_decoder_t *, const void *, size_t);
 ssize_t bjxa_fread_header(bjxa_decoder_t *, FILE *);
 
 ssize_t bjxa_dump_riff_header(bjxa_decoder_t *, void *, size_t);
