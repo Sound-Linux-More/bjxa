@@ -65,6 +65,11 @@ SYNOPSIS
 | **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
 |
+| **ssize_t bjxa_dump_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **void \***\ *dst*\ **, size_t** *len*\ **);**
+| **ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **FILE \***\ *file*\ **);**
+|
 | **int bjxa_decode_format(bjxa_decoder_t \***\ *dec*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **);**
 | **int bjxa_decode(bjxa_decoder_t \***\ *dec*\ **,** \
@@ -84,6 +89,10 @@ file respectively from memory or from a file. On success, the decoder is ready
 to convert samples. A used decoder can parse a new XA header at any time, even
 in the middle of a conversion. The state of the decoder is updated atomically
 only on success.
+
+**bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** write a RIFF
+header of a WAVE file respectively to memory or to a file. Such a header
+followed by the data produced by **bjxa_decode()** produces a valid WAV file.
 
 **bjxa_decode_format()** takes a decoder in a ready state and fills a
 **bjxa_format_t** structure with information about the XA file. This
@@ -112,6 +121,9 @@ On error, -1 or **NULL** is returned, and *errno* is set appropriately.
 read. On success this value is always 32 because XA files have a fixed-size
 header.
 
+**bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** return the
+number of bytes written.
+
 **bjxa_decode()** returns the number of effective blocks decoded.
 
 ERRORS
@@ -127,6 +139,14 @@ ERRORS
 
 	**bjxa_fread_header()** got a null *file*.
 
+	**bjxa_dump_riff_header()** got a *dec* not in a ready state.
+
+	**bjxa_dump_riff_header()** got a null *dst*.
+
+	**bjxa_fwrite_riff_header()** got a *dec* not in a ready state.
+
+	**bjxa_fwrite_riff_header()** got a null *file*.
+
 	**bjxa_decode_format()** got a *dec* not in a ready state.
 
 	**bjxa_decode_format()** got a null *fmt*.
@@ -141,6 +161,9 @@ ERRORS
 
 	**bjxa_parse_header()** got a *len* lower than 32, so the memory
 	buffer can't hold a complete XA header.
+
+	**bjxa_dump_riff_header()** got a *len* too low, so the memory
+	buffer can't hold a complete RIFF header.
 
 	**bjxa_decode()** got a *dst_len* lower than *block_size_pcm*, so the
 	memory buffer *dst* can't hold a complete PCM block.

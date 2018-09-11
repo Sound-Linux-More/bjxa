@@ -145,6 +145,36 @@ mread_le32(uint8_t **buf)
 	return (mread_le(buf, 32));
 }
 
+static void
+mwrite_le(uint8_t **buf, uint32_t val, unsigned bits)
+{
+	unsigned n = 0;
+
+	assert(buf != NULL);
+	assert(*buf != NULL);
+
+	while (n < bits) {
+		**buf = (uint8_t)val;
+		val >>= 8;
+		*buf += 1;
+		n += 8;
+	}
+}
+
+static void
+mputs(uint8_t **buf, const char *str)
+{
+	size_t len;
+
+	assert(str != NULL);
+	assert(buf != NULL);
+	assert(*buf != NULL);
+
+	len = strlen(str);
+	(void)memcpy(*buf, str, len);
+	*buf += len;
+}
+
 /* data structures */
 
 #define BJXA_HEADER_MAGIC	0x3144574b
@@ -460,4 +490,58 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	}
 
 	return (blocks);
+}
+
+/* WAVE file format */
+
+#define RIFF_HEADER_LEN	44
+#define WAVE_HEADER_LEN	16
+#define WAVE_FORMAT_PCM	1
+
+ssize_t
+bjxa_dump_riff_header(bjxa_decoder_t *dec, void *dst, size_t len)
+{
+	bjxa_format_t fmt;
+	uint8_t *hdr;
+
+	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
+	CHECK_PTR(dst);
+	BJXA_BUFFER_CHECK(len >= RIFF_HEADER_LEN);
+	BJXA_TRY(bjxa_decode_format(dec, &fmt));
+
+	hdr = dst;
+	mputs(&hdr, "RIFF");
+	mwrite_le(&hdr, RIFF_HEADER_LEN + fmt.data_len_pcm, 32);
+	mputs(&hdr, "WAVEfmt ");
+	mwrite_le(&hdr, WAVE_HEADER_LEN, 32);
+	mwrite_le(&hdr, WAVE_FORMAT_PCM, 16);
+	mwrite_le(&hdr, fmt.channels, 16);
+	mwrite_le(&hdr, fmt.samples_rate, 32);
+	mwrite_le(&hdr, fmt.samples_rate * fmt.sample_bits / 8, 32);
+	mwrite_le(&hdr, fmt.channels * fmt.sample_bits / 8, 16);
+	mwrite_le(&hdr, fmt.sample_bits, 16);
+	mputs(&hdr, "data");
+	mwrite_le(&hdr, fmt.data_len_pcm, 32);
+
+	assert((uintptr_t)hdr - (uintptr_t)dst == RIFF_HEADER_LEN);
+
+	return (RIFF_HEADER_LEN);
+}
+
+ssize_t
+bjxa_fwrite_riff_header(bjxa_decoder_t *dec, FILE *file)
+{
+	uint8_t buf[RIFF_HEADER_LEN];
+
+	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
+	CHECK_PTR(file);
+	if (bjxa_dump_riff_header(dec, buf, sizeof buf) < 0) {
+		assert(errno != ENOBUFS);
+		return (-1);
+	}
+
+	if (fwrite(buf, sizeof buf, 1, file) != 1)
+		return (-1);
+
+	return (RIFF_HEADER_LEN);
 }

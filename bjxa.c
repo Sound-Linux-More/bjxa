@@ -50,6 +50,11 @@ decode(bjxa_decoder_t *dec)
 		ret = -1;
 	}
 
+	if (bjxa_fwrite_riff_header(dec, stdout) < 0) {
+		perror("bjxa_fwrite_riff_header");
+		ret = -1;
+	}
+
 	while (fmt.blocks > 0 && ret == 0) {
 		if (fread(buf_xa, fmt.block_size_xa, 1, stdin) != 1) {
 			perror("fread");
