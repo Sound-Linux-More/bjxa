@@ -75,7 +75,7 @@ endif
 LOG_COMPILER = ./test/run.sh
 
 TESTS = \
-	test/test_dummy.sh
+	test/test_decode_error.sh
 
 # Distribution
 
@@ -91,4 +91,5 @@ EXTRA_DIST = \
 	bjxa.spec \
 	gcov-tool.sh.in \
 	strip-c-source.sh \
-	test/run.sh.in
+	test/run.sh.in \
+	test/test_setup.sh
