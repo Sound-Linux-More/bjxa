@@ -45,17 +45,17 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 		return (-1);
 	}
 
+	if (bjxa_fwrite_riff_header(dec, out) < 0) {
+		perror("bjxa_fwrite_riff_header");
+		return (-1);
+	}
+
 	/* allocate space for exactly one block */
 	buf_pcm = malloc(fmt.block_size_pcm);
 	buf_xa = malloc(fmt.block_size_xa);
 
 	if (buf_pcm == NULL || buf_xa == NULL) {
 		perror("malloc");
-		ret = -1;
-	}
-
-	if (bjxa_fwrite_riff_header(dec, out) < 0) {
-		perror("bjxa_fwrite_riff_header");
 		ret = -1;
 	}
 
@@ -87,7 +87,8 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 		fmt.blocks--;
 	}
 
-	assert(fmt.data_len_pcm == 0);
+	if (ret == 0)
+		assert(fmt.data_len_pcm == 0);
 
 	free(buf_pcm);
 	free(buf_xa);
