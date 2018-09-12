@@ -341,7 +341,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 		tmp.inflate_cb = bjxa_inflate_4bits;
 	else if (bits == 6)
 		tmp.inflate_cb = bjxa_inflate_6bits;
-	else if (bits == 8)
+	else
 		tmp.inflate_cb = bjxa_inflate_8bits;
 
 	(void)loop;
