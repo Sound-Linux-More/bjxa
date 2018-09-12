@@ -22,3 +22,24 @@ _ Empty file
 _ ----------
 
 expect_error "bjxa_fread_header" bjxa </dev/null
+
+_ ------------------
+_ Wrong magic number
+_ ------------------
+
+mk_hex <<EOF
+4b574432 | KWD2 (magic)
+c0680a00 | 682176 (nDataLen)
+fc170a00 | 661500 (nSamples)
+44ac     | 44100 (nSamplesPerSec)
+08       | 8 (nBits)
+01       | 1 (nChannels)
+00000000 | 0 (nLoopPtr)
+0000     | 0 (befL[0])
+0000     | 0 (befL[1])
+0000     | 0 (befR[0])
+0000     | 0 (befR[1])
+00000000 | 0 (pad)
+EOF
+
+expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin

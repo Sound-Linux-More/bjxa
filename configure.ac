@@ -53,6 +53,9 @@ AM_CONDITIONAL([DOCS], [test "$enable_docs" != "no"])
 test "$enable_docs" != "no" &&
 BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required to build docs])
 
+# Test suite
+BJXA_CHECK_PROG([XXD], [xxd], [required by the test suite])
+
 # Dynamic analysis
 test "$enable_asan" != no &&
 BJXA_ADD_CFLAGS([CFLAGS], [-fno-omit-frame-pointer -fsanitize=address])

@@ -81,3 +81,9 @@ expect_sha1() {
 	fi
 	echo "expect_sha1 ok: $expect"
 }
+
+mk_hex() {
+	"$TEST_DIR/hex_decode" |
+	tee "$WORK_DIR/bin" |
+	"$TEST_DIR/hex_encode" >"$WORK_DIR/hex"
+}

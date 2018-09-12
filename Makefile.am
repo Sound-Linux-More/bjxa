@@ -88,6 +88,8 @@ DISTCLEANFILES = $(nobase_nodist_noinst_SCRIPTS)
 EXTRA_DIST = \
 	$(TESTS) \
 	$(srcdir)/test/*.xa \
+	$(srcdir)/test/hex_decode \
+	$(srcdir)/test/hex_encode \
 	bjxa.1.rst \
 	bjxa.3.rst \
 	bjxa.spec \
