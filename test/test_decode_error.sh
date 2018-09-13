@@ -196,3 +196,66 @@ fc170a00 | 661500 (nSamples)
 EOF
 
 expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+
+_ --------------------------
+_ Invalid mono block profile
+_ --------------------------
+
+mk_hex <<EOF
+4b574431 | KWD1 (id)
+19000000 | 25 (nDataLen)
+20000000 | 32 (nSamples)
+44ac     | 44100 (nSamplesPerSec)
+06       | 6 (nBits)
+01       | 1 (nChannels)
+00000000 | 0 (nLoopPtr)
+0000     | 0 (befL[0])
+0000     | 0 (befL[1])
+0000     | 0 (befR[0])
+0000     | 0 (befR[1])
+00000000 | 0 (pad)
+ff       | block profile (invalid)
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+EOF
+
+expect_error "bjxa_decode" bjxa <"$WORK_DIR"/bin
+
+_ -----------------------------------
+_ Invalid right channel block profile
+_ -----------------------------------
+
+mk_hex <<EOF
+4b574431 | KWD1 (id)
+32000000 | 50 (nDataLen)
+20000000 | 32 (nSamples)
+44ac     | 44100 (nSamplesPerSec)
+06       | 6 (nBits)
+02       | 2 (nChannels)
+00000000 | 0 (nLoopPtr)
+0000     | 0 (befL[0])
+0000     | 0 (befL[1])
+0000     | 0 (befR[0])
+0000     | 0 (befR[1])
+00000000 | 0 (pad)
+00       | block profile
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+ff       | block profile (invalid)
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+00000000 | block data
+EOF
+
+expect_error "bjxa_decode" bjxa <"$WORK_DIR"/bin
