@@ -515,13 +515,14 @@ bjxa_dump_riff_header(bjxa_decoder_t *dec, void *dst, size_t len)
 
 	hdr = dst;
 	mputs(&hdr, "RIFF");
-	mwrite_le(&hdr, RIFF_HEADER_LEN + fmt.data_len_pcm, 32);
+	mwrite_le(&hdr, RIFF_HEADER_LEN - 8 + fmt.data_len_pcm, 32);
 	mputs(&hdr, "WAVEfmt ");
 	mwrite_le(&hdr, WAVE_HEADER_LEN, 32);
 	mwrite_le(&hdr, WAVE_FORMAT_PCM, 16);
 	mwrite_le(&hdr, fmt.channels, 16);
 	mwrite_le(&hdr, fmt.samples_rate, 32);
-	mwrite_le(&hdr, fmt.samples_rate * fmt.sample_bits / 8, 32);
+	mwrite_le(&hdr, fmt.samples_rate * fmt.block_size_pcm /
+	    BJXA_BLOCK_SAMPLES, 32);
 	mwrite_le(&hdr, fmt.channels * fmt.sample_bits / 8, 16);
 	mwrite_le(&hdr, fmt.sample_bits, 16);
 	mputs(&hdr, "data");
