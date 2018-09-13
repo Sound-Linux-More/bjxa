@@ -328,6 +328,9 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE);
 
 	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
+	BJXA_PROTO_CHECK(tmp.data_len > 0);
+	BJXA_PROTO_CHECK(tmp.samples > 0);
+	BJXA_PROTO_CHECK(tmp.samples_rate > 0);
 	BJXA_PROTO_CHECK(bits == 4 || bits == 6 || bits == 8);
 	BJXA_PROTO_CHECK(tmp.channels == 1 || tmp.channels == 2);
 
