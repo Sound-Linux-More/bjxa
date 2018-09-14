@@ -45,6 +45,32 @@ usage(FILE* file)
 	    progname);
 }
 
+static int
+open_files(int argc, char * const *argv)
+{
+
+	if (argc == 0)
+		return (0);
+
+	if (strcmp("-", *argv) && freopen(*argv, "r", stdin) == NULL) {
+		perror("Error");
+		return (-1);
+	}
+
+	argc--;
+	argv++;
+
+	if (argc == 0)
+		return (0);
+
+	if (strcmp("-", *argv) && freopen(*argv, "w", stdout) == NULL) {
+		perror("Error");
+		return (-1);
+	}
+
+	return (0);
+}
+
 int
 main(int argc, char * const *argv)
 {
@@ -66,7 +92,12 @@ main(int argc, char * const *argv)
 	else if (!strcmp("decode", *argv)) {
 		argc--;
 		argv++;
-		if (decode(stdin, stdout) < 0)
+		if (argc > 2) {
+			fprintf(stderr, "bjxa: Too many arguments\n");
+			usage(stderr);
+			return (EXIT_FAILURE);
+		}
+		if (open_files(argc, argv) < 0 || decode(stdin, stdout) < 0)
 			return (EXIT_FAILURE);
 	}
 	else {

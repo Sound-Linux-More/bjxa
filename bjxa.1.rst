@@ -23,6 +23,41 @@ BandJAM XA audio codec program
 
 :Manual section: 1
 
+PROLOG
+======
+
+The goal of **bjxa** is to provide a clean command line interface to interact
+with BandJAM XA audio files.
+
+It is a replacement for the **xa.exe** program that was shipped with BandJAM
+with a license allowing to use it for free of charge projects but its source
+code is unavailable and the Windows executable only exists for 32 bit x86
+systems.
+
+SYNOPSIS
+========
+
+| **bjxa** help
+| **bjxa** decode [*xa-file* [*wav-file*]]
+
+DESCRIPTION
+===========
+
+Decode one XA file and convert it into a WAV file.
+
+With no *xa-file*, or when *xa-file* is **-**, the XA file is read from the
+standard input.
+
+With no *wav-file*, or when *wav-file* is **-**, the WAV file is written to
+the standard output.
+
+EXAMPLE
+=======
+
+Play an XA file from the command line::
+
+    bjxa decode snare.xa | play -
+
 SEE ALSO
 ========
 

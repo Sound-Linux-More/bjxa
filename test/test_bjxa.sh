@@ -34,3 +34,34 @@ _ Unknown action
 _ --------------
 
 expect_error "Unknown action" bjxa unknown
+
+_ ----------------
+_ Decode arguments
+_ ----------------
+
+expect_sha1 "9fa9edf0ac468129c2e73523df55095a504b8d26" \
+	cat <"$TEST_DIR"/square-stereo-8.xa
+
+expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+	bjxa decode "$TEST_DIR"/square-stereo-8.xa
+
+expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+	bjxa decode "$TEST_DIR"/square-stereo-8.xa -
+
+expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+	bjxa decode - - <"$TEST_DIR"/square-stereo-8.xa
+
+bjxa decode "$TEST_DIR"/square-stereo-8.xa "$WORK_DIR"/square-stereo-8.wav
+
+expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+	cat "$WORK_DIR"/square-stereo-8.wav
+
+_ ------------------------
+_ Invalid decode arguments
+_ ------------------------
+
+expect_error "Too many arguments" bjxa decode src.xa dst.wav jnk.arg
+
+expect_error "Error:" bjxa decode "$WORK_DIR"/nonexistent.xa
+expect_error "Error:" bjxa decode "$TEST_DIR"/square-stereo-8.xa \
+	nonexistent/square-stereo-8.wav
