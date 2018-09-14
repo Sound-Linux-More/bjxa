@@ -21,13 +21,13 @@ _ ----------
 _ Empty file
 _ ----------
 
-expect_error "bjxa_fread_header" bjxa </dev/null
+expect_error "bjxa_fread_header" bjxa decode </dev/null
 
 _ ---------------
 _ Unreadable file
 _ ---------------
 
-expect_error "bjxa_fread_header" bjxa <&1
+expect_error "bjxa_fread_header" bjxa decode <&1
 
 _ ------------------
 _ Wrong magic number
@@ -48,7 +48,7 @@ fc170a00 | 661500 (nSamples)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ -------
 _ ENODATA
@@ -69,7 +69,7 @@ fc170a00 | 661500 (nSamples)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ ----------
 _ ENOSAMPLES
@@ -90,7 +90,7 @@ c0680a00 | 682176 (nDataLen)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ ---------------
 _ ETOOMANYSAMPLES
@@ -111,7 +111,7 @@ a1bb0d00 | 900001 (nSamplesPerSec)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ -----------------
 _ ENOTENOUGHSAMPLES
@@ -132,7 +132,7 @@ c0680a00 | 682176 (nDataLen)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ -----------
 _ EWAYTOOSLOW
@@ -153,7 +153,7 @@ fc170a00 | 661500 (nSamples)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ -------------------
 _ Unknown compression
@@ -174,7 +174,7 @@ fc170a00 | 661500 (nSamples)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ -----------
 _ Home studio
@@ -195,7 +195,7 @@ fc170a00 | 661500 (nSamples)
 00000000 | 0 (pad)
 EOF
 
-expect_error "bjxa_fread_header" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
 _ --------------------------
 _ Invalid mono block profile
@@ -223,7 +223,7 @@ ff       | block profile (invalid)
 00000000 | block data
 EOF
 
-expect_error "bjxa_decode" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_decode" bjxa decode <"$WORK_DIR"/bin
 
 _ -----------------------------------
 _ Invalid right channel block profile
@@ -258,4 +258,4 @@ ff       | block profile (invalid)
 00000000 | block data
 EOF
 
-expect_error "bjxa_decode" bjxa <"$WORK_DIR"/bin
+expect_error "bjxa_decode" bjxa decode <"$WORK_DIR"/bin

@@ -75,6 +75,7 @@ endif
 LOG_COMPILER = ./test/run.sh
 
 TESTS = \
+	test/test_bjxa.sh \
 	test/test_decode.sh \
 	test/test_decode_error.sh
 

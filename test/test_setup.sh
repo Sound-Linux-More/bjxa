@@ -39,17 +39,37 @@ _() {
 
 # Test fixtures
 
+expect_success() {
+	msg=$1
+	shift
+	if ! "$@" >"$WORK_DIR"/stdout 2>"$WORK_DIR"/stderr
+	then
+		echo "expect_success: command failed" >&2
+		cat "$WORK_DIR"/stderr >&2
+		return 1
+	fi
+	if ! grep -q "$msg" "$WORK_DIR"/stdout
+	then
+		echo "expect_success: message not found: $msg" >&2
+		cat "$WORK_DIR"/stdout >&2
+		return 1
+	fi
+	echo "expect_success ok: $msg"
+}
+
 expect_error() {
 	msg=$1
 	shift
 	if "$@" >"$WORK_DIR"/stdout 2>"$WORK_DIR"/stderr
 	then
 		echo "expect_error: command succeeded" >&2
+		cat "$WORK_DIR"/stdout >&2
 		return 1
 	fi
 	if ! grep -q "$msg" "$WORK_DIR"/stderr
 	then
 		echo "expect_error: message not found: $msg" >&2
+		cat "$WORK_DIR"/stderr >&2
 		return 1
 	fi
 	echo "expect_error ok: $msg"
