@@ -155,6 +155,27 @@ EOF
 
 expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
+_ ------------------------------------------
+_ Compressed blocks do not match data length
+_ ------------------------------------------
+
+mk_hex <<EOF
+4b574431 | KWD1 (id)
+23000000 | 35 (nDataLen)
+10000000 | 16 (nSamples)
+44ac     | 44100 (nSamplesPerSec)
+08       | 8 (nBits)
+01       | 1 (nChannels)
+00000000 | 0 (nLoopPtr)
+0000     | 0 (befL[0])
+0000     | 0 (befL[1])
+0000     | 0 (befR[0])
+0000     | 0 (befR[1])
+00000000 | 0 (pad)
+EOF
+
+expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
+
 _ -------------------
 _ Unknown compression
 _ -------------------

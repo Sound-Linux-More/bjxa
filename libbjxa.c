@@ -301,7 +301,7 @@ ssize_t
 bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 {
 	bjxa_decoder_t tmp;
-	uint32_t magic, pad, max_samples, loop;
+	uint32_t magic, pad, blocks, max_samples, loop;
 	const uint8_t *buf;
 	uint8_t bits;
 
@@ -335,8 +335,10 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	BJXA_PROTO_CHECK(tmp.channels == 1 || tmp.channels == 2);
 
 	tmp.block_size = bits * 4 + 1;
+	blocks = tmp.data_len / tmp.block_size;
 	max_samples = (BJXA_BLOCK_SAMPLES * tmp.data_len) /
 	    (tmp.block_size * tmp.channels);
+	BJXA_PROTO_CHECK(blocks * tmp.block_size == tmp.data_len);
 	BJXA_PROTO_CHECK(max_samples >= tmp.samples);
 	BJXA_PROTO_CHECK(max_samples - tmp.samples < BJXA_BLOCK_SAMPLES);
 
