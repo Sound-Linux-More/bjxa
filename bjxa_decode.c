@@ -78,6 +78,7 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 		}
 
 		pcm_block = fmt.block_size_pcm;
+		assert(fmt.data_len_pcm > 0);
 		if (pcm_block > fmt.data_len_pcm)
 			pcm_block = fmt.data_len_pcm;
 
