@@ -203,13 +203,6 @@ BUGS
 
 **libbjxa** does not support the *nLoopPtr* field from the XA file header.
 
-A WAV file generated **libbjxa** is not exactly the same as a WAV file
-generated with **xa.exe**. The RIFF headers differ but on this account
-**libbjxa** is correct. The PCM samples are not always identical, but only the
-lower end of samples sometimes differ slightly. Not enough to distort the
-audio. It hasn't been compared with the PCM output of **xadec.dll** but it can
-be assumed that **xa.exe** uses the same code but statically linked it.
-
 SEE ALSO
 ========
 

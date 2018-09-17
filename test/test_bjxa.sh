@@ -42,18 +42,18 @@ _ ----------------
 expect_sha1 "9fa9edf0ac468129c2e73523df55095a504b8d26" \
 	cat <"$TEST_DIR"/square-stereo-8.xa
 
-expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+expect_sha1 "4b10d39db9abfb75bb3561d7a789ca5afb046c75" \
 	bjxa decode "$TEST_DIR"/square-stereo-8.xa
 
-expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+expect_sha1 "4b10d39db9abfb75bb3561d7a789ca5afb046c75" \
 	bjxa decode "$TEST_DIR"/square-stereo-8.xa -
 
-expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+expect_sha1 "4b10d39db9abfb75bb3561d7a789ca5afb046c75" \
 	bjxa decode - - <"$TEST_DIR"/square-stereo-8.xa
 
 bjxa decode "$TEST_DIR"/square-stereo-8.xa "$WORK_DIR"/square-stereo-8.wav
 
-expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+expect_sha1 "4b10d39db9abfb75bb3561d7a789ca5afb046c75" \
 	cat "$WORK_DIR"/square-stereo-8.wav
 
 _ ------------------------

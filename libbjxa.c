@@ -384,11 +384,11 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 /* decode XA blocks */
 
 static const int16_t spread_factor[][2] = {
-	{0x0000, 0x0000},
-	{0x00f0, 0x0000},
-	{0x01cc, 0x00d0},
-	{0x0188, 0x00dc},
-	{0x01e8, 0x00f0},
+	{0,      0},
+	{240,    0},
+	{460, -208},
+	{392, -220},
+	{488, -240},
 };
 
 static int
@@ -396,8 +396,8 @@ bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
     unsigned chan)
 {
 	bjxa_channel_t *state;
-	int32_t spread;
-	int16_t sample, sf0, sf1;
+	int32_t spread, sample;
+	int16_t ranged, sf0, sf1;
 	uint8_t shr, idx;
 	unsigned len, inc;
 
@@ -415,13 +415,19 @@ bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
 	sf1 = spread_factor[idx][1];
 
 	while (len > 0) {
-		sample = *dst >> shr;
-		spread = (state->prev[0] * sf0) - (state->prev[1] * sf1);
+		/* compute sample */
+		ranged = *dst >> shr;
+		spread = (state->prev[0] * sf0) + (state->prev[1] * sf1);
+		sample = ranged + spread / 256;
 
-		if (spread < 0)
-			spread += 0xff;
+		/* clamp sample */
+		if (sample < INT16_MIN)
+			sample = INT16_MIN;
+		if (sample > INT16_MAX)
+			sample = INT16_MAX;
 
-		*dst = (int16_t)(sample + spread / 256);
+		/* propagate sample */
+		*dst = (int16_t)(sample);
 		state->prev[1] = state->prev[0];
 		state->prev[0] = *dst;
 

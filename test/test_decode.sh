@@ -24,7 +24,7 @@ _ ------------
 expect_sha1 "9fa9edf0ac468129c2e73523df55095a504b8d26" \
 	cat <"$TEST_DIR"/square-stereo-8.xa
 
-expect_sha1 "c900c456c5b7e762fc9d73f5be5ece8a63abd875" \
+expect_sha1 "4b10d39db9abfb75bb3561d7a789ca5afb046c75" \
 	bjxa decode <"$TEST_DIR"/square-stereo-8.xa
 
 _ ----------
@@ -34,7 +34,7 @@ _ ----------
 expect_sha1 "9bdaa12181696bc61a4dfd562edb64a0def2f918" \
 	cat <"$TEST_DIR"/square-mono-8.xa
 
-expect_sha1 "eabac6ff44194d350280dd34e8e5be9fcee70530" \
+expect_sha1 "1c7bdc2f42bd87ebaceb8184312a1857a9f6d8de" \
 	bjxa decode <"$TEST_DIR"/square-mono-8.xa
 
 _ ------------
@@ -44,7 +44,7 @@ _ ------------
 expect_sha1 "5241ffdb22617621a6bd7ee9e16055ccb5f59875" \
 	cat <"$TEST_DIR"/square-stereo-6.xa
 
-expect_sha1 "833d279e1a4264d86efbed7d39a12b5875b082ad" \
+expect_sha1 "96eac5430bb7a73dc4801449684a4844b9b917c8" \
 	bjxa decode <"$TEST_DIR"/square-stereo-6.xa
 
 _ ----------
@@ -54,7 +54,7 @@ _ ----------
 expect_sha1 "90749ddb703d17d408dd197ff6a877085b80331d" \
 	cat <"$TEST_DIR"/square-mono-6.xa
 
-expect_sha1 "808f896d6eebfe465610ed8cfcdcac7ae7d44280" \
+expect_sha1 "ce3991eda98db098e45e876944d8324302726a66" \
 	bjxa decode <"$TEST_DIR"/square-mono-6.xa
 
 _ ------------
@@ -64,7 +64,7 @@ _ ------------
 expect_sha1 "43e9ddd9afb8208f7bc84cea991fbcd27807a707" \
 	cat <"$TEST_DIR"/square-stereo-4.xa
 
-expect_sha1 "d45b89cd7286ee1a4ac101f29bac5045c3de20cf" \
+expect_sha1 "35d8815e712737824c61a02f603145594c0827b7" \
 	bjxa decode <"$TEST_DIR"/square-stereo-4.xa
 
 _ ----------
@@ -74,5 +74,5 @@ _ ----------
 expect_sha1 "02c7ec66ecebda313097462218d9dc05e8886806" \
 	cat <"$TEST_DIR"/square-mono-4.xa
 
-expect_sha1 "f0fece5efdbbb138e62e23d2bd1ec6e55913edef" \
+expect_sha1 "064c48434d77d41c7df3030f3e4a85972dcbac80" \
 	bjxa decode <"$TEST_DIR"/square-mono-4.xa
