@@ -52,8 +52,18 @@ dist_pkgconfig_DATA = bjxa.pc
 
 # Documentation
 
+bjxa_3_links = \
+	bjxa_decode.3 \
+	bjxa_decode_format.3 \
+	bjxa_decoder.3 \
+	bjxa_dump_riff_header.3 \
+	bjxa_fread_header.3 \
+	bjxa_free_decoder.3 \
+	bjxa_fwrite_riff_header.3 \
+	bjxa_parse_header.3
+
 dist_doc_DATA = README.rst
-dist_man_MANS = bjxa.1 bjxa.3 bjxa.5
+dist_man_MANS = bjxa.1 bjxa.3 bjxa.5 $(bjxa_3_links)
 
 if DOCS
 DOCS_SUFFIXES = \
@@ -67,6 +77,9 @@ DOCS_SUFFIXES = \
 
 .1.rst.1 .3.rst.3 .5.rst.5:
 	$(AM_V_GEN) $(RST2MAN) --strict $< $@
+
+$(bjxa_3_links):
+	$(AM_V_GEN) printf ".so man3/%s\n" bjxa.3 >$@
 
 bjxa.3: bjxa_decode.c.txt
 endif
