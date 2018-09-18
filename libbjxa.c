@@ -383,8 +383,8 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 
 /* decode XA blocks */
 
-static const int16_t spread_factor[][2] = {
-	{0,      0},
+static const int16_t gain_factor[][2] = {
+	{  0,    0},
 	{240,    0},
 	{460, -208},
 	{392, -220},
@@ -396,29 +396,29 @@ bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
     unsigned chan)
 {
 	bjxa_channel_t *state;
-	int32_t spread, sample;
-	int16_t ranged, sf0, sf1;
-	uint8_t shr, idx;
-	unsigned len, inc;
+	int32_t gain, sample;
+	int16_t ranged, k0, k1;
+	uint8_t range, factor;
+	unsigned samples, step;
 
 	assert(chan == 0 || chan == 1);
 
-	len = BJXA_BLOCK_SAMPLES;
-	inc = dec->channels;
-	idx = profile >> 4;
-	shr = profile & 0x0f;
+	samples = BJXA_BLOCK_SAMPLES;
+	step = dec->channels;
+	factor = profile >> 4;
+	range = profile & 0x0f;
 
-	BJXA_PROTO_CHECK(idx < 6);
+	BJXA_PROTO_CHECK(factor < 5);
 
 	state = &dec->channel_state[chan];
-	sf0 = spread_factor[idx][0];
-	sf1 = spread_factor[idx][1];
+	k0 = gain_factor[factor][0];
+	k1 = gain_factor[factor][1];
 
-	while (len > 0) {
+	while (samples > 0) {
 		/* compute sample */
-		ranged = *dst >> shr;
-		spread = (state->prev[0] * sf0) + (state->prev[1] * sf1);
-		sample = ranged + spread / 256;
+		ranged = *dst >> range;
+		gain = (state->prev[0] * k0) + (state->prev[1] * k1);
+		sample = ranged + gain / 256;
 
 		/* clamp sample */
 		if (sample < INT16_MIN)
@@ -431,8 +431,8 @@ bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
 		state->prev[1] = state->prev[0];
 		state->prev[0] = *dst;
 
-		dst += inc;
-		len--;
+		dst += step;
+		samples--;
 	}
 
 	return (0);

@@ -61,4 +61,5 @@ Play an XA file from the command line::
 SEE ALSO
 ========
 
-**bjxa**\(3)
+**bjxa**\(3),
+**bjxa**\(5)

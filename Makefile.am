@@ -53,10 +53,14 @@ dist_pkgconfig_DATA = bjxa.pc
 # Documentation
 
 dist_doc_DATA = README.rst
-dist_man_MANS = bjxa.1 bjxa.3
+dist_man_MANS = bjxa.1 bjxa.3 bjxa.5
 
 if DOCS
-DOCS_SUFFIXES = .1 .3 .1.rst .3.rst .c .c.txt
+DOCS_SUFFIXES = \
+	.1 .1.rst \
+	.3 .3.rst \
+	.5 .5.rst \
+	.c .c.txt
 
 .c.c.txt:
 	$(srcdir)/strip-c-source.sh $< $@
@@ -65,6 +69,9 @@ DOCS_SUFFIXES = .1 .3 .1.rst .3.rst .c .c.txt
 	$(AM_V_GEN) $(RST2MAN) $< $@
 
 .3.rst.3:
+	$(AM_V_GEN) $(RST2MAN) $< $@
+
+.5.rst.5:
 	$(AM_V_GEN) $(RST2MAN) $< $@
 
 bjxa.3: bjxa_decode.c.txt
