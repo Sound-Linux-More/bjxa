@@ -50,7 +50,8 @@ developing applications that use %{name}.
 %files
 %doc README.rst COPYING
 %{_bindir}/%{name}
-%{_libdir}/lib%{name}.so.*
+%{_libdir}/lib%{name}.so.0
+%{_libdir}/lib%{name}.so.0.*
 %{_libdir}/lib%{name}.la
 
 

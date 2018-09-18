@@ -22,6 +22,15 @@ AC_DEFUN([BJXA_ARG_ENABLE], [dnl
 		[enable_[]$1=$2])
 ])
 
+# BJXA_ARG_WITH(FEATURE, DEFAULT)
+# -------------------------------
+AC_DEFUN([BJXA_ARG_WITH], [dnl
+	AC_ARG_WITH([$1],
+		[AS_HELP_STRING([--with-$1], [with $1 (default is $2)])],
+		[],
+		[with_[]$1=$2])
+])
+
 # _BJXA_CHECK_CFLAGS
 # ------------------
 AC_DEFUN_ONCE([_BJXA_CHECK_CFLAGS], [

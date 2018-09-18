@@ -41,6 +41,13 @@ bin_PROGRAMS = bjxa
 include_HEADERS = bjxa.h
 noinst_HEADERS = bjxa_priv.h
 
+libbjxa_la_LDFLAGS = -version-info 0:0:0
+
+if WITH_LD_VERSION_SCRIPT
+libbjxa_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libbjxa.map
+libbjxa.lo: libbjxa.map
+endif
+
 bjxa_SOURCES = bjxa.c bjxa_decode.c
 bjxa_LDADD = libbjxa.la
 
@@ -109,6 +116,7 @@ EXTRA_DIST = \
 	bjxa.spec \
 	bootstrap \
 	gcov-tool.sh.in \
+	libbjxa.map \
 	strip-c-source.sh \
 	test/hex_decode \
 	test/hex_encode \

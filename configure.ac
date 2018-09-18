@@ -42,12 +42,18 @@ BJXA_ARG_ENABLE([msan], [no])
 BJXA_ARG_ENABLE([ubsan], [no])
 BJXA_ARG_ENABLE([lcov], [no])
 
+BJXA_ARG_WITH([ld-version-script], [yes])
+
 # Standards compliance
 BJXA_CHECK_CFLAGS([CFLAGS], [
 	-pedantic
 	-std=c99
 	-D_POSIX_C_SOURCE=200809L
 ])
+
+# ABI
+AM_CONDITIONAL([WITH_LD_VERSION_SCRIPT],
+	[test "$with_ld_version_script" != "no"])
 
 # Documentation
 AM_CONDITIONAL([DOCS], [test "$enable_docs" != "no"])
