@@ -20,7 +20,7 @@ include rpm.am
 
 # Configuration
 
-nobase_nodist_noinst_SCRIPTS = \
+nodist_noinst_SCRIPTS = \
 	gcov-tool.sh \
 	test/run.sh
 
@@ -88,28 +88,35 @@ endif
 
 LOG_COMPILER = ./test/run.sh
 
-TESTS = \
+dist_check_SCRIPTS = \
 	test/test_bjxa.sh \
 	test/test_decode.sh \
 	test/test_decode_error.sh
+
+TESTS = $(dist_check_SCRIPTS)
 
 # Distribution
 
 SUFFIXES = $(CONFIG_SUFFIXES) $(DOCS_SUFFIXES)
 
 DISTCHECK_CONFIGURE_FLAGS = --disable-docs
-DISTCLEANFILES = $(nobase_nodist_noinst_SCRIPTS) $(dist_man_MANS)
+DISTCLEANFILES = $(nodist_noinst_SCRIPTS) $(dist_man_MANS)
 
 EXTRA_DIST = \
-	$(TESTS) \
-	$(srcdir)/test/*.xa \
-	$(srcdir)/test/hex_decode \
-	$(srcdir)/test/hex_encode \
 	bjxa.1.rst \
 	bjxa.3.rst \
 	bjxa.5.rst \
 	bjxa.spec \
+	bootstrap \
 	gcov-tool.sh.in \
 	strip-c-source.sh \
+	test/hex_decode \
+	test/hex_encode \
 	test/run.sh.in \
+	test/square-mono-4.xa \
+	test/square-mono-6.xa \
+	test/square-mono-8.xa \
+	test/square-stereo-4.xa \
+	test/square-stereo-6.xa \
+	test/square-stereo-8.xa \
 	test/test_setup.sh
