@@ -65,14 +65,8 @@ DOCS_SUFFIXES = \
 .c.c.txt:
 	$(srcdir)/strip-c-source.sh $< $@
 
-.1.rst.1:
-	$(AM_V_GEN) $(RST2MAN) $< $@
-
-.3.rst.3:
-	$(AM_V_GEN) $(RST2MAN) $< $@
-
-.5.rst.5:
-	$(AM_V_GEN) $(RST2MAN) $< $@
+.1.rst.1 .3.rst.3 .5.rst.5:
+	$(AM_V_GEN) $(RST2MAN) --strict $< $@
 
 bjxa.3: bjxa_decode.c.txt
 endif
@@ -91,7 +85,7 @@ TESTS = \
 SUFFIXES = $(CONFIG_SUFFIXES) $(DOCS_SUFFIXES)
 
 DISTCHECK_CONFIGURE_FLAGS = --disable-docs
-DISTCLEANFILES = $(nobase_nodist_noinst_SCRIPTS)
+DISTCLEANFILES = $(nobase_nodist_noinst_SCRIPTS) $(dist_man_MANS)
 
 EXTRA_DIST = \
 	$(TESTS) \
@@ -100,6 +94,7 @@ EXTRA_DIST = \
 	$(srcdir)/test/hex_encode \
 	bjxa.1.rst \
 	bjxa.3.rst \
+	bjxa.5.rst \
 	bjxa.spec \
 	gcov-tool.sh.in \
 	strip-c-source.sh \
