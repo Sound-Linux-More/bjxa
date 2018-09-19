@@ -93,6 +93,7 @@ endif
 
 # Test suite
 
+AM_TESTS_ENVIRONMENT = SRCDIR="$(srcdir)"
 LOG_COMPILER = ./test/run.sh
 
 dist_check_SCRIPTS = \
@@ -100,7 +101,14 @@ dist_check_SCRIPTS = \
 	test/test_decode.sh \
 	test/test_decode_error.sh
 
-TESTS = $(dist_check_SCRIPTS)
+check_PROGRAMS = \
+	test/test_libbjxa_api
+
+test_test_libbjxa_api_LDADD = libbjxa.la
+
+TESTS = $(dist_check_SCRIPTS) $(check_PROGRAMS)
+
+all-local: $(TESTS)
 
 # Distribution
 

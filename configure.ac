@@ -23,7 +23,7 @@ AC_CONFIG_SRCDIR([bjxa.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE([1.12 foreign])
+AM_INIT_AUTOMAKE([1.12 foreign subdir-objects])
 AM_SILENT_RULES([no])
 AM_SANITY_CHECK
 
@@ -42,7 +42,7 @@ BJXA_ARG_ENABLE([msan], [no])
 BJXA_ARG_ENABLE([ubsan], [no])
 BJXA_ARG_ENABLE([lcov], [no])
 
-BJXA_ARG_WITH([ld-version-script], [yes])
+BJXA_ARG_WITH([ld_version_script], [yes])
 
 # Standards compliance
 BJXA_CHECK_CFLAGS([CFLAGS], [
