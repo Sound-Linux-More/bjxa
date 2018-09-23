@@ -131,33 +131,17 @@ of bytes read from *src* and written to *dst* can be computed using the
 ERRORS
 ======
 
+**EFAULT**
+
+	*decp* is a null pointer or a pointer to a null decoder.
+
+	*dec* or *src* or *dst* or *file* or *fmt* is null.
+
 **EINVAL**
 
-	*decp* is a null pointer or is not a pointer to a valid decoder.
+	*decp* is not a pointer to a valid decoder.
 
-	*dec* is null or not a valid decoder.
-
-	**bjxa_parse_header()** got a null *src*.
-
-	**bjxa_fread_header()** got a null *file*.
-
-	**bjxa_dump_riff_header()** got a *dec* not in a ready state.
-
-	**bjxa_dump_riff_header()** got a null *dst*.
-
-	**bjxa_fwrite_riff_header()** got a *dec* not in a ready state.
-
-	**bjxa_fwrite_riff_header()** got a null *file*.
-
-	**bjxa_decode_format()** got a *dec* not in a ready state.
-
-	**bjxa_decode_format()** got a null *fmt*.
-
-	**bjxa_decode()** got a *dec* not in a ready state.
-
-	**bjxa_decode()** got a null *dst*.
-
-	**bjxa_decode()** got a null *src*.
+	*dec* is not a valid decoder, or a decoder not in a ready state.
 
 **ENOBUFS**
 

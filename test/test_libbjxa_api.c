@@ -49,13 +49,13 @@ ADD_TEST_CASE(memory_management)
 	assert(junk != NULL);
 
 	assert(bjxa_free_decoder(NULL) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_free_decoder(&dec) == 0);
 	assert(dec == NULL);
 
 	assert(bjxa_free_decoder(&dec) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	dec = junk;
 	assert(bjxa_free_decoder(&dec) == -1);
@@ -78,25 +78,25 @@ ADD_TEST_CASE(header_parsing)
 	assert(junk != NULL);
 
 	assert(bjxa_parse_header(NULL, junk, 32) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_parse_header(junk, junk, 32) == -1);
 	assert(errno == EINVAL);
 
 	assert(bjxa_parse_header(dec, NULL, 32) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_parse_header(dec, junk, 0) == -1);
 	assert(errno == ENOBUFS);
 
 	assert(bjxa_fread_header(NULL, stdin) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_fread_header(junk, stdin) == -1);
 	assert(errno == EINVAL);
 
 	assert(bjxa_fread_header(dec, NULL) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_free_decoder(&dec) == 0);
 	assert(dec == NULL);
@@ -116,7 +116,7 @@ ADD_TEST_CASE(file_format)
 	assert(junk != NULL);
 
 	assert(bjxa_decode_format(NULL, &fmt) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_decode_format(junk, &fmt) == -1);
 	assert(errno == EINVAL);
@@ -125,7 +125,7 @@ ADD_TEST_CASE(file_format)
 	assert(errno == EINVAL);
 
 	assert(bjxa_decode_format(dec, NULL) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_free_decoder(&dec) == 0);
 	assert(dec == NULL);
@@ -146,7 +146,7 @@ ADD_TEST_CASE(decoding)
 
 	assert(bjxa_decode(NULL, dst_buf, sizeof dst_buf, src_buf,
 	    sizeof src_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_decode(junk, dst_buf, sizeof dst_buf, src_buf,
 	    sizeof src_buf) == -1);
@@ -157,20 +157,19 @@ ADD_TEST_CASE(decoding)
 	assert(errno == EINVAL);
 
 	file = fopen("test/square-mono-4.xa", "r");
-	fprintf(stderr, "errno=%d %s\n", errno, strerror(errno));
 	assert(file != NULL);
 	assert(bjxa_fread_header(dec, file) > 0);
 
 	assert(bjxa_decode(dec, NULL, sizeof dst_buf, src_buf,
 	    sizeof src_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_decode(dec, dst_buf, 0, src_buf, sizeof src_buf) == -1);
 	assert(errno == ENOBUFS);
 
 	assert(bjxa_decode(dec, dst_buf, sizeof dst_buf, NULL,
 	    sizeof src_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_decode(dec, dst_buf, sizeof dst_buf, src_buf, 0) == -1);
 	assert(errno == ENOBUFS);
@@ -194,7 +193,7 @@ ADD_TEST_CASE(riff_header_dumping)
 	assert(junk != NULL);
 
 	assert(bjxa_fwrite_riff_header(NULL, stdout) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_fwrite_riff_header(junk, stdout) == -1);
 	assert(errno == EINVAL);
@@ -203,7 +202,7 @@ ADD_TEST_CASE(riff_header_dumping)
 	assert(errno == EINVAL);
 
 	assert(bjxa_dump_riff_header(NULL, dst_buf, sizeof dst_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_dump_riff_header(junk, dst_buf, sizeof dst_buf) == -1);
 	assert(errno == EINVAL);
@@ -212,18 +211,17 @@ ADD_TEST_CASE(riff_header_dumping)
 	assert(errno == EINVAL);
 
 	file = fopen("test/square-mono-4.xa", "r");
-	fprintf(stderr, "errno=%d %s\n", errno, strerror(errno));
 	assert(file != NULL);
 	assert(bjxa_fread_header(dec, file) > 0);
 
 	assert(bjxa_fwrite_riff_header(dec, NULL) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_fwrite_riff_header(dec, stdin) == -1);
 	assert(errno == EBADF);
 
 	assert(bjxa_dump_riff_header(dec, NULL, sizeof dst_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EFAULT);
 
 	assert(bjxa_dump_riff_header(dec, dst_buf, 0) == -1);
 	assert(errno == ENOBUFS);

@@ -53,14 +53,15 @@
 #define CHECK_PTR(p) \
 	do { \
 		if ((p) == NULL) { \
-			errno = EINVAL; \
+			errno = EFAULT; \
 			return (-1); \
 		} \
 	} while (0)
 
 #define CHECK_OBJ(o, m) \
 	do { \
-		if ((o) == NULL || (o)->magic != (m)) { \
+		CHECK_PTR(o); \
+		if ((o)->magic != (m)) { \
 			errno = EINVAL; \
 			return (-1); \
 		} \
@@ -68,10 +69,8 @@
 
 #define TAKE_OBJ(o, p, m) \
 	do { \
-		if ((p) == NULL || *(p) == NULL || (*(p))->magic != (m)) { \
-			errno = EINVAL; \
-			return (-1); \
-		} \
+		CHECK_PTR(p); \
+		CHECK_OBJ(*(p), (m)); \
 		o = *p; \
 		*p = NULL; \
 	} while (0)
