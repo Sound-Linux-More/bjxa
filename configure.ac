@@ -34,15 +34,15 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_CC_C99
 
-BJXA_ARG_ENABLE([docs], [no])
-BJXA_ARG_ENABLE([warnings], [no])
-BJXA_ARG_ENABLE([hardening], [no])
-BJXA_ARG_ENABLE([asan], [no])
-BJXA_ARG_ENABLE([msan], [no])
-BJXA_ARG_ENABLE([ubsan], [no])
-BJXA_ARG_ENABLE([lcov], [no])
+BJXA_ARG_ENABLE([docs])
+BJXA_ARG_ENABLE([warnings])
+BJXA_ARG_ENABLE([hardening])
+BJXA_ARG_ENABLE([asan])
+BJXA_ARG_ENABLE([msan])
+BJXA_ARG_ENABLE([ubsan])
+BJXA_ARG_ENABLE([lcov])
 
-BJXA_ARG_WITH([ld_version_script], [yes])
+BJXA_ARG_WITHOUT([ld version script])
 
 # Standards compliance
 BJXA_CHECK_CFLAGS([CFLAGS], [
@@ -189,6 +189,8 @@ AS_ECHO("
 	compiler:     $CC
 	cflags:       $CFLAGS
 	ldflags:      $LDFLAGS
+
+	ld version script: $with_ld_version_script
 
 	--enable-silent-rules=${enable_silent_rules:-no}
 	--enable-docs=$enable_docs

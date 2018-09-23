@@ -13,22 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# BJXA_ARG_ENABLE(FEATURE, DEFAULT)
-# ---------------------------------
+# BJXA_ARG_ENABLE(FEATURE)
+# ------------------------
 AC_DEFUN([BJXA_ARG_ENABLE], [dnl
-	AC_ARG_ENABLE([$1],
-		[AS_HELP_STRING([--enable-$1], [enable $1 (default is $2)])],
+	AC_ARG_ENABLE([m4_translit([$1], [ ], [-])],
+		[AS_HELP_STRING([--enable-m4_translit([$1], [ ], [-])],
+			[enable $1])],
 		[],
-		[enable_[]$1=$2])
+		[enable_[]m4_translit([$1], [ ], [_])=no])
 ])
 
-# BJXA_ARG_WITH(FEATURE, DEFAULT)
-# -------------------------------
-AC_DEFUN([BJXA_ARG_WITH], [dnl
-	AC_ARG_WITH([$1],
-		[AS_HELP_STRING([--with-$1], [with $1 (default is $2)])],
+# BJXA_ARG_WITHOUT(FEATURE)
+# -------------------------
+AC_DEFUN([BJXA_ARG_WITHOUT], [dnl
+	AC_ARG_WITH([m4_translit([$1], [ ], [-])],
+		[AS_HELP_STRING([--without-m4_translit([$1], [ ], [-])],
+			[without $1])],
 		[],
-		[with_[]$1=$2])
+		[with_[]m4_translit([$1], [ ], [_])=yes])
 ])
 
 # _BJXA_CHECK_CFLAGS
