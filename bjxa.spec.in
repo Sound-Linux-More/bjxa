@@ -15,7 +15,7 @@ BuildRequires:  /usr/bin/xxd
 This is an audio codec for BandJAM XA audio files used in several games, some
 of them open source. Unfortunately the source code for xa.exe and xadec.dll
 was not available and limited to Windows 32 bit systems. The libbjxa library
-and bjxa program offer a portable interface for decoding XA files.
+and bjxa program offer a portable interface to decode XA files.
 
 Because CDROM XA from which BandJAM XA derives is a lossy codec, it is better
 not to convert existing XA files into WAVE files to then re-encode them with a

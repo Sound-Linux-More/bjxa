@@ -110,6 +110,10 @@ be truncated if the number of remaining samples is less than the contents of a
 full XA block. The field *data_len_pcm* can be used to keep track of how many
 bytes were decoded over iterations.
 
+A decoder is not MT-Safe. The **bjxa_decoder()** function is MT-Safe but any
+function taking a **bjxa_decoder_t** argument is not. A **bjxa_decoder_t**
+should be manipulated by a single thread at a time.
+
 RETURN VALUE
 ============
 
