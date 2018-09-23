@@ -76,3 +76,47 @@ expect_sha1 "02c7ec66ecebda313097462218d9dc05e8886806" \
 
 expect_sha1 "064c48434d77d41c7df3030f3e4a85972dcbac80" \
 	bjxa decode <"$TEST_DIR"/square-mono-4.xa
+
+_ ----------------------
+_ PCM samples boundaries
+_ ----------------------
+
+# Left channel PCM samples overflow with ADPCM samples of UINT8_MAX all the
+# way. Right channel PCM samples underflow with ADPCM samples of UINT8_MIN
+# all the way too.
+
+mk_hex <<EOF
+4b574431 | KWD1 (id)
+42000000 | 66 (nDataLen)
+20000000 | 32 (nSamples)
+44ac     | 44100 (nSamplesPerSec)
+08       | 8 (nBits)
+02       | 2 (nChannels)
+00000000 | 0 (nLoopPtr)
+0000     | 0 (befL[0])
+0000     | 0 (befL[1])
+0000     | 0 (befR[0])
+0000     | 0 (befR[1])
+00000000 | 0 (pad)
+20       | block profile (high gain, low range)
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+7f7f7f7f | block data
+20       | block profile (high gain, low range)
+80808080 | block data
+80808080 | block data
+80808080 | block data
+80808080 | block data
+80808080 | block data
+80808080 | block data
+80808080 | block data
+80808080 | block data
+EOF
+
+expect_sha1 "56ba3f62bf27ac9fd19cd97bcda06b4db327e612" \
+	bjxa decode <"$WORK_DIR"/bin
