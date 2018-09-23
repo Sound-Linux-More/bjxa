@@ -198,4 +198,8 @@ AS_ECHO("
 	--enable-asan=$enable_asan
 	--enable-msan=$enable_msan
 	--enable-ubsan=$enable_ubsan
+
+	RST2MAN=$RST2MAN
+	XXD=$XXD
+	SHA1=$SHA1
 ")
