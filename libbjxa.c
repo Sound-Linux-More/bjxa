@@ -179,7 +179,6 @@ mputs(uint8_t **buf, const char *str)
 /* data structures */
 
 #define BJXA_HEADER_MAGIC	0x3144574b
-#define BJXA_HEADER_SIZE	32
 #define BJXA_BLOCK_SAMPLES	32
 
 typedef uint8_t bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
@@ -308,7 +307,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(src);
-	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE);
+	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE_XA);
 
 	buf = src;
 
@@ -326,7 +325,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	tmp.channel_state[1].prev[1] = (int16_t)mread_le16(&buf);
 	pad = mread_le32(&buf);
 
-	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE);
+	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE_XA);
 
 	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
 	BJXA_PROTO_CHECK(tmp.data_len > 0);
@@ -354,13 +353,13 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	(void)pad;
 
 	(void)memcpy(dec, &tmp, sizeof tmp);
-	return (BJXA_HEADER_SIZE);
+	return (BJXA_HEADER_SIZE_XA);
 }
 
 ssize_t
 bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 {
-	uint8_t buf[BJXA_HEADER_SIZE];
+	uint8_t buf[BJXA_HEADER_SIZE_XA];
 	ssize_t ret;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
@@ -510,7 +509,6 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 
 /* WAVE file format */
 
-#define RIFF_HEADER_LEN	44
 #define WAVE_HEADER_LEN	16
 #define WAVE_FORMAT_PCM	1
 
@@ -522,12 +520,12 @@ bjxa_dump_riff_header(bjxa_decoder_t *dec, void *dst, size_t len)
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(dst);
-	BJXA_BUFFER_CHECK(len >= RIFF_HEADER_LEN);
+	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE_RIFF);
 	BJXA_TRY(bjxa_decode_format(dec, &fmt));
 
 	hdr = dst;
 	mputs(&hdr, "RIFF");
-	mwrite_le(&hdr, RIFF_HEADER_LEN - 8 + fmt.data_len_pcm, 32);
+	mwrite_le(&hdr, BJXA_HEADER_SIZE_RIFF - 8 + fmt.data_len_pcm, 32);
 	mputs(&hdr, "WAVEfmt ");
 	mwrite_le(&hdr, WAVE_HEADER_LEN, 32);
 	mwrite_le(&hdr, WAVE_FORMAT_PCM, 16);
@@ -540,15 +538,15 @@ bjxa_dump_riff_header(bjxa_decoder_t *dec, void *dst, size_t len)
 	mputs(&hdr, "data");
 	mwrite_le(&hdr, fmt.data_len_pcm, 32);
 
-	assert((uintptr_t)hdr - (uintptr_t)dst == RIFF_HEADER_LEN);
+	assert((uintptr_t)hdr - (uintptr_t)dst == BJXA_HEADER_SIZE_RIFF);
 
-	return (RIFF_HEADER_LEN);
+	return (BJXA_HEADER_SIZE_RIFF);
 }
 
 ssize_t
 bjxa_fwrite_riff_header(bjxa_decoder_t *dec, FILE *file)
 {
-	uint8_t buf[RIFF_HEADER_LEN];
+	uint8_t buf[BJXA_HEADER_SIZE_RIFF];
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(file);
@@ -560,5 +558,5 @@ bjxa_fwrite_riff_header(bjxa_decoder_t *dec, FILE *file)
 	if (fwrite(buf, sizeof buf, 1, file) != 1)
 		return (-1);
 
-	return (RIFF_HEADER_LEN);
+	return (BJXA_HEADER_SIZE_RIFF);
 }

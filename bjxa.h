@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define BJXA_HEADER_SIZE_XA	32
+#define BJXA_HEADER_SIZE_RIFF	44
+
 typedef struct bjxa_decoder bjxa_decoder_t;
 
 typedef struct {

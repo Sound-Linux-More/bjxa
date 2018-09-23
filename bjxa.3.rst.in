@@ -45,6 +45,9 @@ SYNOPSIS
 |
 | **#include <bjxa.h>**
 |
+| **#define** *BJXA_HEADER_SIZE_XA*
+| **#define** *BJXA_HEADER_SIZE_RIFF*
+|
 | **typedef struct bjxa_decoder bjxa_decoder_t;**
 |
 | **typedef struct {**
@@ -118,11 +121,13 @@ described below.
 On error, -1 or **NULL** is returned, and *errno* is set appropriately.
 
 **bjxa_parse_header()** and **bjxa_fread_header()** return the number of bytes
-read. On success this value is always 32 because XA files have a fixed-size
-header.
+read. On success this value is always *BJXA_HEADER_SIZE_XA* because XA files
+have a fixed-size header.
 
 **bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** return the
-number of bytes written.
+number of bytes written. On success this value is always
+*BJXA_HEADER_SIZE_RIFF* because **libbjxa** always produces fixed-size RIFF
+headers.
 
 **bjxa_decode()** returns the number of effective blocks decoded. The number
 of bytes read from *src* and written to *dst* can be computed using the
