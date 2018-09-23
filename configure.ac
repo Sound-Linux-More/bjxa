@@ -62,6 +62,7 @@ BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required to build docs])
 
 # Test suite
 BJXA_CHECK_PROG([XXD], [xxd], [required by the test suite])
+BJXA_CHECK_PROG([SHA1], [sha1 sha1sum], [required by the test suite])
 
 # Dynamic analysis
 test "$enable_asan" != no &&
