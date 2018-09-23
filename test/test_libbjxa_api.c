@@ -135,6 +135,7 @@ ADD_TEST_CASE(file_format)
 ADD_TEST_CASE(decoding)
 {
 	bjxa_decoder_t *dec;
+	bjxa_format_t fmt;
 	FILE *file;
 	void *junk;
 
@@ -173,6 +174,12 @@ ADD_TEST_CASE(decoding)
 
 	assert(bjxa_decode(dec, dst_buf, sizeof dst_buf, src_buf, 0) == -1);
 	assert(errno == ENOBUFS);
+
+	assert(bjxa_decode_format(dec, &fmt) == 0);
+	assert(bjxa_decode(dec, dst_buf, fmt.block_size_pcm * 2,
+	    src_buf, fmt.block_size_xa) == 1);
+	assert(bjxa_decode(dec, dst_buf, fmt.block_size_pcm,
+	    src_buf, fmt.block_size_xa * 2) == 1);
 
 	assert(bjxa_free_decoder(&dec) == 0);
 	assert(dec == NULL);
