@@ -23,19 +23,24 @@ config.status
 configure
 libtool
 stamp-h1
+test/.dirstamp
 
 # programs
 # --------
 
 bjxa
 test/run.sh
+test/test_libbjxa_api
 
 # manual
 # ------
 
 *.1
 *.3
+*.5
+*.c.txt
 *.pdf
+bjxa.3.rst
 
 # code coverage
 # -------------
