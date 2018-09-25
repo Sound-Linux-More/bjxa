@@ -77,11 +77,10 @@ expect_error() {
 
 sha1() {
 	case ${SHA1:-} in
-		sha1sum) sha1sum "$1" ;;
-		sha1) command sha1 -r "$1" ;;
-		*) ${SHA1:-sha1sum} "$1" ;;
-	esac |
-	awk '{print $1}'
+		sha1sum) sha1sum "$1" | awk '{print $1}' ;;
+		sha1) command sha1 "$1" | awk '{print $NF}' ;;
+		*) ${SHA1:-sha1sum} "$1" | awk '{print $1}' ;;
+	esac
 }
 
 expect_sha1() {
