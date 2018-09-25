@@ -9,17 +9,7 @@ ROOT_DIR=$(dirname "$0")
 test -n "$ROOT_DIR"
 cd "$ROOT_DIR"
 
-if ! command -v libtoolize >/dev/null 2>&1
-then
-	echo 'libtoolize: command not found, falling back to glibtoolize' >&2
-	alias libtoolize=glibtoolize
-fi
-
-aclocal -I m4
-libtoolize --copy --force
-autoheader
-automake --add-missing --copy --foreign
-autoreconf
+autoreconf -i
 
 cd "$WORK_DIR"
 "$ROOT_DIR"/configure \
