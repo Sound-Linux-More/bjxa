@@ -49,6 +49,7 @@ BJXA_CHECK_CFLAGS([CFLAGS], [
 	-pedantic
 	-std=c99
 	-D_POSIX_C_SOURCE=200809L
+	-D_XOPEN_SOURCE=500
 ])
 
 # ABI
