@@ -31,6 +31,8 @@ CONFIG_SUFFIXES = .sh.in .sh
 	$(AM_V_GEN) $(SED) \
 		-e 's:[@]builddir[@]:$(abs_top_builddir):' \
 		-e 's:[@]GCOV[@]:$(GCOV):' \
+		-e 's:[@]SHA1[@]:$(SHA1):' \
+		-e 's:[@]XXD[@]:$(XXD):' \
 		<'$<' >$@
 	chmod +x $@
 

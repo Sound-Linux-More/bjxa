@@ -5,4 +5,7 @@ set -u
 
 PATH=@builddir@:$PATH
 
+export SHA1='@SHA1@'
+export XXD='@XXD@'
+
 exec "$@"
