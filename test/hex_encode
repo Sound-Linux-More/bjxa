@@ -6,7 +6,7 @@
 
 ${XXD:-xxd} -g2 |
 sed -e '
-	s/^[^ ]* //	# remove leading spaces
-	s/^.\{40\}/&|/	# put a "|" after 40 columns
-	s/[ ]*$//	# remove trailing spaces
+	s/^[^ ]* //
+	s/^.\{40\}/&|/
+	s/[ ]*$//
 '

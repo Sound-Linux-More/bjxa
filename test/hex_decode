@@ -6,8 +6,8 @@
 
 # Decode a hexdump from the test suite and output the raw binary
 sed -e '
-	/^[ ]*$/d	# remove blank lines
-	/^[ ]*#/d	# remove comment lines
-	s/|.*//		# remove ASCII display
+	/^[ ]*$/d
+	/^[ ]*#/d
+	s/|.*//
 ' |
 ${XXD:-xxd} -r -p
