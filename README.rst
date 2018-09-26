@@ -13,6 +13,27 @@ more modern lossy codec.
 This is the result of a reverse engineering project to not only offer a
 decoder for the file format but also document it.
 
+Portability
+-----------
+
+bjxa has been successfully tested on the following systems:
+
+- FreeBSD
+- GNU/Linux (Fedora)
+- Illumos (OmniOS)
+- NetBSD
+
+bjxa has been partially cross-compiled for Windows, testing using Wine fails
+halfway through.
+
+It has been tested on Fedora for the following architectures:
+
+- aarch64
+- armv7hl
+- i686
+- ppc64le
+- x86_64 (amd64)
+
 Installation
 ------------
 
