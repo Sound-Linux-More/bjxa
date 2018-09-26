@@ -87,7 +87,21 @@ It has been tested on Fedora for the following architectures:
 - x86_64 (amd64)
 
 bjxa has been partially cross-compiled for Windows, testing using Wine fails
-halfway through.
+halfway through. To build it on a Unix-like system with MinGW, you can try
+this::
+
+    $ ./configure \
+    >        --host=<ARCH>-w64-mingw32 \
+    >        --disable-static \
+    >        CFLAGS=" \
+    >            -Wno-pedantic \
+    >            -std=gnu99 \
+    >            -U_POSIX_C_SOURCE \
+    >            -U_XOPEN_SOURCE \
+    >        "
+    $ make LDFLAGS=-no-undefined
+
+And replace ``<ARCH>`` with the desired architecture.
 
 Hacking
 -------
