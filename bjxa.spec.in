@@ -61,6 +61,7 @@ developing applications that use %{name}.
 %{_libdir}/lib%{name}.so.0
 %{_libdir}/lib%{name}.so.0.*
 %{_libdir}/lib%{name}.la
+%{_mandir}/man1/%{name}*
 
 
 %files devel
@@ -68,7 +69,8 @@ developing applications that use %{name}.
 %{_libdir}/lib%{name}.so
 %{_libdir}/lib%{name}.a
 %{_libdir}/pkgconfig/%{name}.pc
-%{_mandir}/man*/%{name}*
+%{_mandir}/man3/%{name}*
+%{_mandir}/man5/%{name}*
 
 
 %changelog
