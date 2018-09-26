@@ -13,29 +13,6 @@ more modern lossy codec.
 This is the result of a reverse engineering project to not only offer a
 decoder for the file format but also document it.
 
-Portability
------------
-
-bjxa has been successfully tested on the following systems:
-
-- FreeBSD
-- GNU/Linux (Fedora)
-- Illumos (OmniOS)
-- NetBSD
-
-bjxa has been partially cross-compiled for Windows, testing using Wine fails
-halfway through.
-
-It has been tested on Fedora for the following architectures:
-
-- aarch64
-- armv7hl
-- i686
-- ppc64
-- ppc64le
-- s390x
-- x86_64 (amd64)
-
 Installation
 ------------
 
@@ -88,6 +65,29 @@ In particular, the ``bjxa(3)`` manual comes with a code example showing how
 the actual ``bjxa(1)`` program uses the library to decode XA files. The
 ``bjxa(5)`` manual describes the BandJAM XA file format, loosely based on the
 CDROM XA standard for real time compressed audio on some CDROM-based systems.
+
+Portability
+-----------
+
+bjxa has been successfully tested on the following systems:
+
+- FreeBSD
+- GNU/Linux (Fedora)
+- Illumos (OmniOS)
+- NetBSD
+
+It has been tested on Fedora for the following architectures:
+
+- aarch64
+- armv7hl
+- i686
+- ppc64
+- ppc64le
+- s390x
+- x86_64 (amd64)
+
+bjxa has been partially cross-compiled for Windows, testing using Wine fails
+halfway through.
 
 Hacking
 -------
