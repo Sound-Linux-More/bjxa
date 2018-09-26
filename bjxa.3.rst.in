@@ -68,16 +68,16 @@ SYNOPSIS
 | **ssize_t bjxa_fread_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
 |
-| **ssize_t bjxa_dump_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
-      **void \***\ *dst*\ **, size_t** *len*\ **);**
-| **ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
-      **FILE \***\ *file*\ **);**
-|
 | **int bjxa_decode_format(bjxa_decoder_t \***\ *dec*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **);**
 | **int bjxa_decode(bjxa_decoder_t \***\ *dec*\ **,** \
       **void \***\ *dst*\ **, size_t** *dst_len*\ **,** \
       **const void \***\ *src*\ **, size_t** *src_len*\ **);**
+|
+| **ssize_t bjxa_dump_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **void \***\ *dst*\ **, size_t** *len*\ **);**
+| **ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
+      **FILE \***\ *file*\ **);**
 
 DESCRIPTION
 ===========
