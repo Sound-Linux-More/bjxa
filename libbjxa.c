@@ -98,7 +98,7 @@
 
 /* little endian */
 
-static inline uint32_t
+static uint32_t
 mread_le(const uint8_t **buf, unsigned bits)
 {
 	unsigned n = 0;
