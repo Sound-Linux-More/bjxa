@@ -1,0 +1,13 @@
+=====================
+bjxa 0.1 (2018-09-26)
+=====================
+
+* XA decoder
+* libbjxa library
+* bjxa program
+* bjxa manuals
+* RPM packaging
+* GNU/Linux support
+* FreeBSD support
+* NetBSD support
+* Illumos support
