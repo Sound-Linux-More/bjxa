@@ -367,7 +367,7 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 
 	if (fread(buf, sizeof buf, 1, file) != 1) {
 		if (feof(file))
-			errno = ENODATA;
+			errno = EIO;
 		return (-1);
 	}
 

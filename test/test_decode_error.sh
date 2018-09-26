@@ -50,9 +50,9 @@ EOF
 
 expect_error "bjxa_fread_header" bjxa decode <"$WORK_DIR"/bin
 
-_ -------
-_ ENODATA
-_ -------
+_ ---
+_ EIO
+_ ---
 
 mk_hex <<EOF
 4b574431 | KWD1 (id)

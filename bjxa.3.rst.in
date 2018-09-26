@@ -152,6 +152,10 @@ ERRORS
 
 	*dec* is not a valid decoder, or a decoder not in a ready state.
 
+**EIO**
+
+	**bjxa_fread_header()** could not read a complete XA header.
+
 **ENOBUFS**
 
 	**bjxa_parse_header()** got a *len* lower than 32, so the memory
@@ -165,10 +169,6 @@ ERRORS
 
 	**bjxa_decode()** got a *src_len* lower than *block_size_xa*, so the
 	memory buffer *src* can't hold a complete XA block.
-
-**ENODATA**
-
-	**bjxa_fread_header()** could not read a complete XA header.
 
 **ENOMEM**
 
