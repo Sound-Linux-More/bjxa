@@ -239,6 +239,39 @@ ADD_TEST_CASE(riff_header_dumping)
 	assert(fclose(file) == 0);
 }
 
+ADD_TEST_CASE(pcm_samples_dumping)
+{
+	const void *src = src_buf;
+	void *dst = dst_buf;
+
+	assert(bjxa_dump_pcm(NULL, src, 32) == -1);
+	assert(errno == EFAULT);
+
+	assert(bjxa_dump_pcm(dst, NULL, 32) == -1);
+	assert(errno == EFAULT);
+
+	assert(bjxa_dump_pcm(dst, src, 0) == -1);
+	assert(errno == ENOBUFS);
+
+	assert(bjxa_dump_pcm(dst, src, 31) == -1);
+	assert(errno == ENOBUFS);
+
+	assert(bjxa_fwrite_pcm(NULL, 32, stdout) == -1);
+	assert(errno == EFAULT);
+
+	assert(bjxa_fwrite_pcm(src, 0, stdout) == -1);
+	assert(errno == ENOBUFS);
+
+	assert(bjxa_fwrite_pcm(src, 31, stdout) == -1);
+	assert(errno == ENOBUFS);
+
+	assert(bjxa_fwrite_pcm(src, 32, NULL) == -1);
+	assert(errno == EFAULT);
+
+	assert(bjxa_fwrite_pcm(src, 32, stdin) == -1);
+	assert(errno == EBADF);
+}
+
 int
 main(void)
 {
@@ -253,5 +286,6 @@ main(void)
 	RUN_TEST_CASE(file_format);
 	RUN_TEST_CASE(decoding);
 	RUN_TEST_CASE(riff_header_dumping);
+	RUN_TEST_CASE(pcm_samples_dumping);
 	return (EXIT_SUCCESS);
 }

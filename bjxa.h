@@ -42,3 +42,5 @@ int bjxa_decode(bjxa_decoder_t *, void *, size_t, const void *, size_t);
 ssize_t bjxa_dump_riff_header(bjxa_decoder_t *, void *, size_t);
 ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t *, FILE *);
 
+int bjxa_dump_pcm(void *, const int16_t *, size_t);
+int bjxa_fwrite_pcm(const int16_t *, size_t, FILE *);

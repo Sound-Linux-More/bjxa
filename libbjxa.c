@@ -560,3 +560,52 @@ bjxa_fwrite_riff_header(bjxa_decoder_t *dec, FILE *file)
 
 	return (BJXA_HEADER_SIZE_RIFF);
 }
+
+int
+bjxa_dump_pcm(void *dst, const int16_t *src, size_t len)
+{
+	uint8_t *out;
+
+	CHECK_PTR(dst);
+	CHECK_PTR(src);
+	BJXA_BUFFER_CHECK(len > 0);
+	BJXA_BUFFER_CHECK((len & 1) == 0);
+
+	out = dst;
+
+	while (len > 0) {
+		out[0] = (uint8_t)(*src & 0xff);
+		out[1] = (uint8_t)(*src >> 8);
+		src++;
+		out += 2;
+		len -= 2;
+	}
+
+	return (0);
+}
+
+int
+bjxa_fwrite_pcm(const int16_t *src, size_t len, FILE *file)
+{
+	int16_t buf[BJXA_BLOCK_SAMPLES];
+	size_t buf_len = sizeof buf;
+	int ret;
+
+	CHECK_PTR(src);
+	CHECK_PTR(file);
+	BJXA_BUFFER_CHECK(len > 0);
+	BJXA_BUFFER_CHECK((len & 1) == 0);
+
+	while (len > 0) {
+		if (buf_len > len)
+			buf_len = len;
+		ret = bjxa_dump_pcm(buf, src, buf_len);
+		assert(ret == 0);
+		if (fwrite(buf, buf_len, 1, file) != 1)
+			return (-1);
+		src += buf_len / sizeof *src;
+		len -= buf_len;
+	}
+
+	return (0);
+}

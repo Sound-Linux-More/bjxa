@@ -31,7 +31,9 @@ It has been tested on Fedora for the following architectures:
 - aarch64
 - armv7hl
 - i686
+- ppc64
 - ppc64le
+- s390x
 - x86_64 (amd64)
 
 Installation

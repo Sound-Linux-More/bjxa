@@ -82,8 +82,8 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 		if (pcm_block > fmt.data_len_pcm)
 			pcm_block = fmt.data_len_pcm;
 
-		if (fwrite(buf_pcm, pcm_block, 1, out) != 1) {
-			perror("fwrite");
+		if (bjxa_fwrite_pcm(buf_pcm, pcm_block, out) < 0) {
+			perror("bjxa_fwrite_pcm");
 			ret = -1;
 			break;
 		}

@@ -78,6 +78,11 @@ SYNOPSIS
       **void \***\ *dst*\ **, size_t** *len*\ **);**
 | **ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t \***\ *dec*\ **,** \
       **FILE \***\ *file*\ **);**
+|
+| **int bjxa_dump_pcm(void \***\ *dst*\ **, const int16_t \***\ *src*\ **,** \
+      **size_t** *len*\ **);**
+| **int bjxa_fwrite_pcm(const int16_t \***\ *src*\ **, size_t** *len*\ **,** \
+      **FILE \***\ *file*\ **);**
 
 DESCRIPTION
 ===========
@@ -113,6 +118,10 @@ bytes were decoded over iterations.
 A decoder is not MT-Safe. The **bjxa_decoder()** function is MT-Safe but any
 function taking a **bjxa_decoder_t** argument is not. A **bjxa_decoder_t**
 should be manipulated by a single thread at a time.
+
+**bjxa_dump_pcm()** and **bjxa_fwrite_pcm()** write PCM samples respectively
+to memory or to a file, regardless of the host byte order. *len* is always
+the buffer length for *src* and *dst*, not the number of samples.
 
 RETURN VALUE
 ============
@@ -169,6 +178,12 @@ ERRORS
 
 	**bjxa_decode()** got a *src_len* lower than *block_size_xa*, so the
 	memory buffer *src* can't hold a complete XA block.
+
+        **bjxa_dump_pcm()** got a *len* of zero or not aligning to the size of
+        a complete sample.
+
+        **bjxa_fwrite_pcm()** got a *len* of zero or not aligning to the size of
+        a complete sample.
 
 **ENOMEM**
 

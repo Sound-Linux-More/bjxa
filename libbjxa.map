@@ -18,9 +18,11 @@ LIBBJXA_0.1 {
     bjxa_decode;
     bjxa_decode_format;
     bjxa_decoder;
+    bjxa_dump_pcm;
     bjxa_dump_riff_header;
     bjxa_fread_header;
     bjxa_free_decoder;
+    bjxa_fwrite_pcm;
     bjxa_fwrite_riff_header;
     bjxa_parse_header;
 
