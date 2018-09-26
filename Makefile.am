@@ -65,9 +65,11 @@ bjxa_3_links = \
 	bjxa_decode.3 \
 	bjxa_decode_format.3 \
 	bjxa_decoder.3 \
+	bjxa_dump_pcm.3 \
 	bjxa_dump_riff_header.3 \
 	bjxa_fread_header.3 \
 	bjxa_free_decoder.3 \
+	bjxa_fwrite_pcm.3 \
 	bjxa_fwrite_riff_header.3 \
 	bjxa_parse_header.3
 
