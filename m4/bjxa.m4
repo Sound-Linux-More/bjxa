@@ -23,6 +23,16 @@ AC_DEFUN([BJXA_ARG_ENABLE], [dnl
 		[enable_[]m4_translit([$1], [ ], [_])=no])
 ])
 
+# BJXA_ARG_WITH(FEATURE)
+# ----------------------
+AC_DEFUN([BJXA_ARG_WITH], [dnl
+	AC_ARG_WITH([m4_translit([$1], [ ], [-])],
+		[AS_HELP_STRING([--with-m4_translit([$1], [ ], [-])],
+			[with $1])],
+		[],
+		[with_[]m4_translit([$1], [ ], [_])=no])
+])
+
 # BJXA_ARG_WITHOUT(FEATURE)
 # -------------------------
 AC_DEFUN([BJXA_ARG_WITHOUT], [dnl

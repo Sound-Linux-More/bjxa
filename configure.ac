@@ -54,10 +54,10 @@ BJXA_CHECK_CFLAGS([CFLAGS], [
 
 # ABI
 AM_CONDITIONAL([WITH_LD_VERSION_SCRIPT],
-	[test "$with_ld_version_script" != "no"])
+	[test "$with_ld_version_script" != no])
 
 # Documentation
-AM_CONDITIONAL([DOCS], [test "$enable_docs" != "no"])
+AM_CONDITIONAL([DOCS], [test "$enable_docs" != no])
 test "$enable_docs" != "no" &&
 BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required to build docs])
 
