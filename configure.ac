@@ -34,7 +34,6 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_CC_C99
 
-BJXA_ARG_ENABLE([docs])
 BJXA_ARG_ENABLE([warnings])
 BJXA_ARG_ENABLE([hardening])
 BJXA_ARG_ENABLE([asan])
@@ -43,6 +42,7 @@ BJXA_ARG_ENABLE([ubsan])
 BJXA_ARG_ENABLE([lcov])
 
 BJXA_ARG_WITHOUT([ld version script])
+BJXA_ARG_WITH([documentation])
 
 # Standards compliance
 BJXA_CHECK_CFLAGS([CFLAGS], [
@@ -57,9 +57,9 @@ AM_CONDITIONAL([WITH_LD_VERSION_SCRIPT],
 	[test "$with_ld_version_script" != no])
 
 # Documentation
-AM_CONDITIONAL([DOCS], [test "$enable_docs" != no])
-test "$enable_docs" != "no" &&
-BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required to build docs])
+AM_CONDITIONAL([WITH_DOCUMENTATION], [test "$with_documentation" != no])
+test "$with_documentation" != "no" &&
+BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required for documentation])
 
 # Test suite
 BJXA_CHECK_PROG([XXD], [xxd], [required by the test suite])
@@ -194,13 +194,14 @@ AS_ECHO("
 	ld version script: $with_ld_version_script
 
 	--enable-silent-rules=${enable_silent_rules:-no}
-	--enable-docs=$enable_docs
 	--enable-warnings=$enable_warnings
 	--enable-hardening=$enable_hardening
 	--enable-lcov=$enable_lcov
 	--enable-asan=$enable_asan
 	--enable-msan=$enable_msan
 	--enable-ubsan=$enable_ubsan
+
+	--with-documentation=$with_documentation
 
 	RST2MAN=$RST2MAN
 	XXD=$XXD

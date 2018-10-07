@@ -76,8 +76,8 @@ bjxa_3_links = \
 dist_doc_DATA = README.rst
 dist_man_MANS = bjxa.1 bjxa.3 bjxa.5 $(bjxa_3_links)
 
-if DOCS
-DOCS_SUFFIXES = \
+if WITH_DOCUMENTATION
+DOCUMENTATION_SUFFIXES = \
 	.1 .1.rst \
 	.3 .3.rst \
 	.5 .5.rst \
@@ -116,7 +116,7 @@ all-local: $(TESTS)
 
 # Distribution
 
-SUFFIXES = $(CONFIG_SUFFIXES) $(DOCS_SUFFIXES)
+SUFFIXES = $(CONFIG_SUFFIXES) $(DOCUMENTATION_SUFFIXES)
 
 DISTCHECK_CONFIGURE_FLAGS = --disable-docs
 DISTCLEANFILES = $(nodist_noinst_SCRIPTS) $(dist_man_MANS)

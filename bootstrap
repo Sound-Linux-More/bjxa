@@ -13,8 +13,8 @@ autoreconf -i
 
 cd "$WORK_DIR"
 "$ROOT_DIR"/configure \
-	--enable-docs \
 	--enable-warnings \
 	--enable-hardening \
 	--enable-silent-rules \
+	--with-documentation \
 	"$@"
