@@ -56,7 +56,7 @@ developing applications that use %{name}.
 
 
 %files
-%doc README.rst COPYING
+%doc README.rst COPYING ChangeLog
 %{_bindir}/%{name}
 %{_libdir}/lib%{name}.so.0
 %{_libdir}/lib%{name}.so.0.*
