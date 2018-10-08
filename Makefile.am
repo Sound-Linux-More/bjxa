@@ -95,6 +95,25 @@ $(bjxa_3_links):
 bjxa.3: bjxa_decode.c.txt
 endif
 
+# C#
+
+if WITH_DOTNET
+dotnet_binaries = \
+	dotnet/bjxa.exe \
+	dotnet/libbjxa.dll
+
+dotnet/bjxa.exe: dotnet/libbjxa.dll
+
+.cs.dll:
+	@mkdir -p dotnet/
+	$(AM_V_CCLD) $(CSC) -target:library -out:$@ $<
+
+.cs.exe:
+	$(AM_V_CCLD) $(CSC) -target:exe -r:dotnet/libbjxa.dll -out:$@ $<
+endif
+
+noinst_SCRIPTS = $(dotnet_binaries)
+
 # Test suite
 
 AM_TESTS_ENVIRONMENT = SRCDIR="$(srcdir)"
@@ -121,12 +140,16 @@ SUFFIXES = $(CONFIG_SUFFIXES) $(DOCUMENTATION_SUFFIXES)
 DISTCHECK_CONFIGURE_FLAGS = --disable-docs
 DISTCLEANFILES = $(nodist_noinst_SCRIPTS) $(dist_man_MANS)
 
+CLEANFILES = $(noinst_SCRIPTS)
+
 EXTRA_DIST = \
 	bjxa.1.rst \
 	bjxa.3.rst \
 	bjxa.5.rst \
 	bjxa.spec \
 	bootstrap \
+	dotnet/bjxa.cs \
+	dotnet/libbjxa.cs \
 	gcov-tool.sh.in \
 	libbjxa.map \
 	strip-c-source.sh \

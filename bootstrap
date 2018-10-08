@@ -17,4 +17,5 @@ cd "$WORK_DIR"
 	--enable-hardening \
 	--enable-silent-rules \
 	--with-documentation \
+	--with-dotnet \
 	"$@"

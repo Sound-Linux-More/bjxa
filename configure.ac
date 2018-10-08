@@ -43,6 +43,7 @@ BJXA_ARG_ENABLE([lcov])
 
 BJXA_ARG_WITHOUT([ld version script])
 BJXA_ARG_WITH([documentation])
+BJXA_ARG_WITH([dotnet])
 
 # Standards compliance
 BJXA_CHECK_CFLAGS([CFLAGS], [
@@ -170,6 +171,11 @@ then
 	])
 fi
 
+# C#
+AM_CONDITIONAL([WITH_DOTNET], [test "$with_dotnet" != no])
+test "$with_dotnet" != no &&
+BJXA_CHECK_PROG([CSC], [csc mcs], [C# compiler for dotnet builds])
+
 # Configured files
 AC_CONFIG_FILES([
 	Makefile
@@ -202,7 +208,9 @@ AS_ECHO("
 	--enable-ubsan=$enable_ubsan
 
 	--with-documentation=$with_documentation
+	--with-dotnet=$with_dotnet
 
+	CSC=$CSC
 	RST2MAN=$RST2MAN
 	XXD=$XXD
 	SHA1=$SHA1

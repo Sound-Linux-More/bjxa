@@ -25,10 +25,12 @@ libtool
 stamp-h1
 test/.dirstamp
 
-# programs
-# --------
+# executables
+# -----------
 
 bjxa
+bjxa.exe
+libbjxa.dll
 test/run.sh
 test/test_libbjxa_api
 
