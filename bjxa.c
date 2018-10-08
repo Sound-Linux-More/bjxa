@@ -36,7 +36,7 @@ usage(FILE* file)
 	fprintf(file,
 	    "Usage: %s <action> [args...]\n"
 	    "\n"
-	    "Available action:\n"
+	    "Available actions:\n"
 	    "\n"
 	    "  help\n"
 	    "    Show this message and exit.\n"
