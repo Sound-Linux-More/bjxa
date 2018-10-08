@@ -84,7 +84,7 @@ DOCUMENTATION_SUFFIXES = \
 	.c .c.txt
 
 .c.c.txt:
-	$(srcdir)/strip-c-source.sh $< $@
+	$(AM_V_GEN) $(srcdir)/strip-c-source.sh $< $@
 
 .1.rst.1 .3.rst.3 .5.rst.5:
 	$(AM_V_GEN) $(RST2MAN) --strict $< $@
