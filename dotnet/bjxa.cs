@@ -18,6 +18,8 @@
 using System;
 using System.IO;
 
+using static System.Diagnostics.Trace;
+
 namespace bjxa {
 	class CliArgumentException: ArgumentException {
 		public CliArgumentException(string message): base(message) { }
@@ -56,8 +58,31 @@ namespace bjxa {
 
 		static void Decode() {
 			Decoder dec = new Decoder();
-			Console.Error.WriteLine("Decoder: " + dec);
-			throw new InvalidOperationException("Unimplemented");
+			Format fmt = dec.ReadHeader(xa);
+			dec.WriteRiffHeader(wav);
+
+			byte[] buf_xa = new byte[fmt.BlockSizeXa];
+			short[] buf_pcm = new short[fmt.BlockSizePcm];
+			uint pcm_block = fmt.BlockSizePcm;
+
+			while (fmt.Blocks > 0) {
+				if (xa.Read(buf_xa, 0, buf_xa.Length) !=
+				    buf_xa.Length)
+					throw new IOException(
+					    "Unexpected end of file.");
+
+				int blocks = dec.Decode(buf_xa, buf_pcm);
+				Assert(blocks == 1);
+
+				pcm_block = Math.Min(pcm_block,
+				    fmt.DataLengthPcm);
+
+				fmt.WritePcm(wav, buf_pcm);
+				fmt.DataLengthPcm -= pcm_block;
+				fmt.Blocks--;
+			}
+
+			Assert(fmt.DataLengthPcm == 0);
 		}
 
 		static void Exec(string[] args) {

@@ -15,11 +15,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.IO;
 using System.Reflection;
 
 [assembly:AssemblyVersionAttribute("0.0")]
 
 namespace bjxa {
+	public class Format {
+		public const int HEADER_SIZE_XA = 32;
+		public const int HEADER_SIZE_RIFF = 44;
+
+		public uint	DataLengthPcm;
+		public uint	Blocks;
+		public byte	BlockSizePcm;
+		public byte	BlockSizeXa;
+		public ushort	SamplesRate;
+		public byte	SampleBits;
+		public byte	Channels;
+
+		public byte[] WritePcm(byte[] dst, short[] pcm) {
+			throw new NotImplementedException("WritePcm");
+		}
+
+		public int WritePcm(Stream wav, short[] pcm) {
+			throw new NotImplementedException("WritePcm");
+		}
+	}
+
 	public class Decoder {
+		public Format ReadHeader(byte[] xa) {
+			throw new NotImplementedException("ReadHeader");
+		}
+
+		public Format ReadHeader(Stream xa) {
+			throw new NotImplementedException("ReadHeader");
+		}
+
+		public byte[] WriteRiffHeader() {
+			throw new NotImplementedException("WriteRiffHeader");
+		}
+
+		public int WriteRiffHeader(Stream wav) {
+			throw new NotImplementedException("WriteRiffHeader");
+		}
+
+		public int Decode(byte[] xa, short[] pcm) {
+			throw new NotImplementedException("Decode");
+		}
 	}
 }
