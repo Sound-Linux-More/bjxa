@@ -63,7 +63,7 @@ namespace bjxa {
 
 			byte[] buf_xa = new byte[fmt.BlockSizeXa];
 			short[] buf_pcm = new short[fmt.BlockSizePcm];
-			uint pcm_block = fmt.BlockSizePcm;
+			long pcm_block = fmt.BlockSizePcm;
 
 			while (fmt.Blocks > 0) {
 				if (xa.Read(buf_xa, 0, buf_xa.Length) !=
