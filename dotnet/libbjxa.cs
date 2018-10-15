@@ -55,6 +55,26 @@ namespace bjxa {
 		internal static uint ReadUInt(byte[] buf, int off) {
 			return (Read(buf, off, 32));
 		}
+
+		internal static void Write(byte[] buf, int off, long val,
+		    int len) {
+			Write(buf, off, (ulong)val, len);
+		}
+
+		internal static void Write(byte[] buf, int off, ulong val,
+		    int len) {
+			Assert(buf != null);
+			Assert(off >= 0);
+			Assert(len > 0);
+			Assert(off + len / 8 <= buf.Length);
+
+			while (len > 0) {
+				buf[off] = (byte)val;
+				val >>= 8;
+				len -= 8;
+				off++;
+			}
+		}
 	}
 
 	public class Format {
@@ -63,6 +83,8 @@ namespace bjxa {
 
 		internal const uint HEADER_MAGIC = 0x3144574b;
 		internal const uint BLOCK_SAMPLES = 32;
+		internal const uint WAVE_HEADER_LEN = 16;
+		internal const ushort WAVE_FORMAT_PCM = 1;
 
 		public long	DataLengthPcm;
 		public long	Blocks;
@@ -71,6 +93,29 @@ namespace bjxa {
 		public ushort	SamplesRate;
 		public uint	SampleBits;
 		public uint	Channels;
+
+		public long RiffHeaderLength {
+			get { return (HEADER_SIZE_RIFF - 8 + DataLengthPcm); }
+		}
+
+		public uint WaveHeaderLength {
+			get { return (WAVE_HEADER_LEN); }
+		}
+
+		public uint WaveFormatPcm {
+			get { return (WAVE_FORMAT_PCM); }
+		}
+
+		public uint WaveByteRate {
+			get {
+				return (SamplesRate * BlockSizePcm /
+				    BLOCK_SAMPLES);
+			}
+		}
+
+		public uint WaveBlockAlign {
+			get { return (Channels * SampleBits / 8); }
+		}
 
 		internal Format() { }
 
@@ -230,11 +275,38 @@ namespace bjxa {
 		}
 
 		public byte[] WriteRiffHeader() {
-			throw new NotImplementedException("WriteRiffHeader");
+			if (state == null)
+				throw new InvalidOperationException(
+				    "Decoder not ready");
+			Format fmt = state.ToFormat();
+			byte[] hdr = new byte[Format.HEADER_SIZE_RIFF];
+			LittleEndian.Write(hdr,  0, 0x46464952, 32); /* RIFF */
+			LittleEndian.Write(hdr,  4, fmt.RiffHeaderLength, 32);
+			LittleEndian.Write(hdr,  8, 0x45564157, 32); /* WAVE */
+			LittleEndian.Write(hdr, 12, 0x20746d66, 32); /* fmt  */
+			LittleEndian.Write(hdr, 16, fmt.WaveHeaderLength, 32);
+			LittleEndian.Write(hdr, 20, fmt.WaveFormatPcm, 16);
+			LittleEndian.Write(hdr, 22, fmt.Channels, 16);
+			LittleEndian.Write(hdr, 24, fmt.SamplesRate, 32);
+			LittleEndian.Write(hdr, 28, fmt.WaveByteRate, 32);
+			LittleEndian.Write(hdr, 32, fmt.WaveBlockAlign, 16);
+			LittleEndian.Write(hdr, 34, fmt.SampleBits, 16);
+			LittleEndian.Write(hdr, 36, 0x61746164, 32); /* data */
+			LittleEndian.Write(hdr, 40, fmt.DataLengthPcm, 32);
+			return (hdr);
 		}
 
 		public int WriteRiffHeader(Stream wav) {
-			throw new NotImplementedException("WriteRiffHeader");
+			if (state == null)
+				throw new InvalidOperationException(
+				    "Decoder not ready");
+			if (wav == null)
+				throw new ArgumentNullException(
+				    "bjxa.Decoder.WriteRiffHeader: wav");
+
+			byte[] hdr = WriteRiffHeader();
+			wav.Write(hdr, 0, hdr.Length);
+			return (hdr.Length);
 		}
 
 		public int Decode(byte[] xa, short[] pcm) {
