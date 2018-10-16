@@ -150,13 +150,14 @@ namespace bjxa {
 		internal ushort		SamplesRate;
 		internal uint		BlockSize;
 		internal uint		Channels;
-		internal ChannelState	Left;
-		internal ChannelState	Right;
+		internal ChannelState[]	LR;
 		internal Inflate	Inflate;
 
 		internal DecoderState() {
-			Left = new ChannelState();
-			Right = new ChannelState();
+			LR = new ChannelState[2] {
+				new ChannelState(),
+				new ChannelState(),
+			};
 		}
 
 		internal bool IsValid() {
@@ -263,10 +264,10 @@ namespace bjxa {
 			uint bits = xa[14];
 			tmp.Channels = xa[15];
 			/* XXX: skipping loop ptr field for now */
-			tmp.Left.Prev0 = LittleEndian.ReadShort(xa, 20);
-			tmp.Left.Prev1 = LittleEndian.ReadShort(xa, 22);
-			tmp.Right.Prev0 = LittleEndian.ReadShort(xa, 24);
-			tmp.Right.Prev1 = LittleEndian.ReadShort(xa, 26);
+			tmp.LR[0].Prev0 = LittleEndian.ReadShort(xa, 20);
+			tmp.LR[0].Prev1 = LittleEndian.ReadShort(xa, 22);
+			tmp.LR[1].Prev0 = LittleEndian.ReadShort(xa, 24);
+			tmp.LR[1].Prev1 = LittleEndian.ReadShort(xa, 26);
 			/* XXX: ignoring padding for now */
 
 			tmp.Inflate = BlockInflater(bits);
@@ -327,8 +328,45 @@ namespace bjxa {
 			return (hdr.Length);
 		}
 
+		private readonly short[,] GainFactor = {
+			{  0,    0},
+			{240,    0},
+			{460, -208},
+			{392, -220},
+			{488, -240},
+		};
+
 		private void DecodeInflated(short[] pcm, int off, byte prof) {
-			throw new NotImplementedException("DecodeInflated");
+			Assert(off == 0 || off == 1);
+			Assert(Format.BLOCK_SAMPLES * state.Channels ==
+			    pcm.Length);
+
+			int factor = prof >> 4;
+			int range = prof & 0x0f;
+
+			if (factor >= GainFactor.Length)
+				throw new FormatError(
+				    $"Invalid factor: {factor}");
+
+			ChannelState chan = state.LR[off];
+			short k0 = GainFactor[factor,0];
+			short k1 = GainFactor[factor,1];
+
+			for (uint i = Format.BLOCK_SAMPLES; i > 0; i--) {
+				int ranged = pcm[off] >> range;
+				int gain = (chan.Prev0 * k0) +
+				    (chan.Prev1 * k1);
+				int sample = ranged + gain / 256;
+
+				sample = Math.Max(sample, Int16.MinValue);
+				sample = Math.Min(sample, Int16.MaxValue);
+
+				pcm[off] = (short)sample;
+				chan.Prev1 = chan.Prev0;
+				chan.Prev0 = (short)sample;
+
+				off += (int)state.Channels;
+			}
 		}
 
 		public int Decode(byte[] xa, short[] pcm) {
