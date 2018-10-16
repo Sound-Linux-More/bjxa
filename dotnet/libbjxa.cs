@@ -94,6 +94,10 @@ namespace bjxa {
 		public uint	SampleBits;
 		public uint	Channels;
 
+		public uint BlockSamples {
+			get { return (BLOCK_SAMPLES * Channels); }
+		}
+
 		public long RiffHeaderLength {
 			get { return (HEADER_SIZE_RIFF - 8 + DataLengthPcm); }
 		}
@@ -222,8 +226,22 @@ namespace bjxa {
 
 			if (bits == 8)
 				return ((dec, dst, off, src) => {
-					throw new NotImplementedException(
-						"8bit inflater");
+					Assert(off == 0 || off == 1);
+					Assert(Format.BLOCK_SAMPLES *
+					    dec.Channels == dst.Length);
+
+					byte profile = src[0];
+					int srcOff = 1;
+
+					for (uint n = Format.BLOCK_SAMPLES;
+					    n > 0; n--) {
+						dst[off] =
+						    (short)(src[srcOff] << 8);
+						off += (int)dec.Channels;
+						srcOff++;
+					}
+
+					return (profile);
 				});
 
 			return (null);
@@ -309,8 +327,61 @@ namespace bjxa {
 			return (hdr.Length);
 		}
 
+		private void DecodeInflated(short[] pcm, int off, byte prof) {
+			throw new NotImplementedException("DecodeInflated");
+		}
+
 		public int Decode(byte[] xa, short[] pcm) {
-			throw new NotImplementedException("Decode");
+			if (state == null)
+				throw new InvalidOperationException(
+				    "Decoder not ready");
+			if (xa == null)
+				throw new ArgumentNullException(
+				    "bjxa.Decoder.Decode: xa");
+			if (pcm == null)
+				throw new ArgumentNullException(
+				    "bjxa.Decoder.Decode: pcm");
+
+			Format fmt = state.ToFormat();
+			int xaLen = xa.Length * sizeof(byte);
+			int xaOff = 0;
+			int pcmLen = pcm.Length * sizeof(short);
+			int pcmOff = 0;
+			byte[] xaBuf = new byte[state.BlockSize];
+			short[] pcmBuf = new short[fmt.BlockSamples];
+			int blocks = 0;
+
+			while (xaLen >= fmt.BlockSizeXa &&
+			    pcmLen >= fmt.BlockSizePcm) {
+
+				Array.Copy(xa, xaOff, xaBuf, 0, xaBuf.Length);
+				byte prof = state.Inflate(state, pcmBuf, 0,
+				    xaBuf);
+				DecodeInflated(pcmBuf, 0, prof);
+
+				xaOff += xaBuf.Length;
+				xaLen -= xaBuf.Length;
+
+				if (state.Channels == 2) {
+					Array.Copy(xa, xaOff, xaBuf, 0,
+					    xaBuf.Length);
+					prof = state.Inflate(state, pcmBuf, 1,
+					    xaBuf);
+					DecodeInflated(pcmBuf, 1, prof);
+
+					xaOff += xaBuf.Length;
+					xaLen -= xaBuf.Length;
+				}
+
+				Array.Copy(pcmBuf, 0, pcm, pcmOff,
+				    pcmBuf.Length);
+				pcmOff += pcmBuf.Length;
+				pcmLen -= (int)fmt.BlockSizePcm;
+
+				blocks++;
+			}
+
+			return (blocks);
 		}
 	}
 }

@@ -62,7 +62,7 @@ namespace bjxa {
 			dec.WriteRiffHeader(wav);
 
 			byte[] buf_xa = new byte[fmt.BlockSizeXa];
-			short[] buf_pcm = new short[fmt.BlockSizePcm];
+			short[] buf_pcm = new short[fmt.BlockSamples];
 			long pcm_block = fmt.BlockSizePcm;
 
 			while (fmt.Blocks > 0) {
