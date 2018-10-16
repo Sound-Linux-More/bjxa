@@ -287,7 +287,7 @@ bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 	src++;
 
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n--) {
-		*dst = (int16_t)(src[0] << 8);
+		*dst = (int16_t)(*src << 8);
 		dst += chan;
 		src++;
 	}
