@@ -103,6 +103,34 @@ this::
 
 And replace ``<ARCH>`` with the desired architecture.
 
+Windows Support
+---------------
+
+The project should in theory also work on Windows but it hasn't been verified.
+However there is a .NET variant of bjxa written in C#. Starting with version
+0.2 a Zip file containing the source code and Windows executables is available
+on release pages. The DLL and EXE are however not built and tested on Windows,
+instead Mono is used for building and Wine for testing.
+
+Assuming the installation instructions were followed to build from source, and
+assuming the Mono development files are available on the system, the following
+steps will reconfigure the project and build the C# code::
+
+    $ ./configure --with-dotnet --enable-silent-rules
+    [...]
+    $ make
+      CCLD     dotnet/libbjxa.dll
+      CCLD     dotnet/bjxa.exe
+      GEN      dotnet/bjxa-0.2.zip
+
+The test suite currently doesn't test the C# code, it has been manually tested
+to produce bit-for-bit identical WAVE files.
+
+It is possible to specify a C# compiler and command line options to the
+compiler, for example to enable debug assertions::
+
+    $ ./configure --with-dotnet CSC=past/to/csc CSFLAGS=-d:DEBUG
+
 Hacking
 -------
 
@@ -125,10 +153,14 @@ The ``bootstrap`` script needs to be run only once. In order to reconfigure
 the build tree, you can use autoconf's ``configure`` script. Command-line
 arguments to the ``bootstrap`` script are passed to ``configure``.
 
+By default the ``bootstrap`` script configures the build tree to include .NET
+support. To only build the C library from git, pass the ``--without-dotnet``
+argument to the ``bootstrap`` execution.
+
 For code coverage, the simplest way to get a report is as follows::
 
    $ path/to/bjxa/bootsrap --enable-lcov
    $ make lcov
    $ xdg-open lcov/index.html
 
-One goal is to maintain the 100% coverage of the library.
+One goal is to maintain the 100% coverage of the C library.
