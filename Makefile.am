@@ -104,12 +104,14 @@ dotnet_binaries = \
 
 dotnet/bjxa.exe: dotnet/libbjxa.dll
 
+CSBUILD = $(AM_V_CCLD) $(CSC) $(CSFLAGS)
+
 .cs.dll:
 	@mkdir -p dotnet/
-	$(AM_V_CCLD) $(CSC) -target:library -out:$@ $<
+	$(CSBUILD) -target:library -out:$@ $<
 
 .cs.exe:
-	$(AM_V_CCLD) $(CSC) -target:exe -r:dotnet/libbjxa.dll -out:$@ $<
+	$(CSBUILD) -target:exe -r:dotnet/libbjxa.dll -out:$@ $<
 endif
 
 noinst_SCRIPTS = $(dotnet_binaries)

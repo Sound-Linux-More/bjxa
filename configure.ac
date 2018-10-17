@@ -175,6 +175,7 @@ fi
 AM_CONDITIONAL([WITH_DOTNET], [test "$with_dotnet" != no])
 test "$with_dotnet" != no &&
 BJXA_CHECK_PROG([CSC], [csc mcs], [C# compiler for dotnet builds])
+AC_ARG_VAR([CSFLAGS], [C# compiler flags])
 
 # Configured files
 AC_CONFIG_FILES([
