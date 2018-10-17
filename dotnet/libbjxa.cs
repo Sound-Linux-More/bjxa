@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-using static System.Diagnostics.Trace;
+using static System.Diagnostics.Debug;
 
 [assembly:AssemblyVersionAttribute("0.0")]
 

@@ -18,7 +18,7 @@
 using System;
 using System.IO;
 
-using static System.Diagnostics.Trace;
+using static System.Diagnostics.Debug;
 
 namespace bjxa {
 	class CliArgumentException: ArgumentException {
