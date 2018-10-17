@@ -77,7 +77,7 @@ namespace bjxa {
 				pcm_block = Math.Min(pcm_block,
 				    fmt.DataLengthPcm);
 
-				fmt.WritePcm(wav, buf_pcm);
+				fmt.WritePcm(wav, buf_pcm, pcm_block);
 				fmt.DataLengthPcm -= pcm_block;
 				fmt.Blocks--;
 			}

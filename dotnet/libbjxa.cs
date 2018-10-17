@@ -123,15 +123,22 @@ namespace bjxa {
 
 		internal Format() { }
 
-		public byte[] WritePcm(short[] pcm) {
+		public byte[] WritePcm(short[] pcm, long len) {
 			if (pcm == null)
 				throw new ArgumentNullException(
 				    "bjxa.Format.WritePcm: pcm");
+			if (len % sizeof(short) != 0)
+				throw new ArgumentException(
+				    "Invalid length: {len}");
+			int pcmLen = (int)len / sizeof(short);
+			if (pcmLen < 0 || pcmLen > pcm.Length)
+				throw new ArgumentException(
+				    "Invalid length: {len}");
 
-			byte[] dst = new byte[pcm.Length * sizeof(short)];
+			byte[] dst = new byte[pcmLen * sizeof(short)];
 
 			int dstOff = 0, pcmOff = 0;
-			while (pcmOff < pcm.Length) {
+			while (pcmOff < pcmLen) {
 				ushort sample = (ushort)pcm[pcmOff];
 				pcmOff++;
 
@@ -144,7 +151,7 @@ namespace bjxa {
 			return (dst);
 		}
 
-		public int WritePcm(Stream wav, short[] pcm) {
+		public int WritePcm(Stream wav, short[] pcm, long len) {
 			if (wav == null)
 				throw new ArgumentNullException(
 				    "bjxa.Format.WritePcm: wav");
@@ -152,7 +159,7 @@ namespace bjxa {
 				throw new ArgumentNullException(
 				    "bjxa.Format.WritePcm: pcm");
 
-			byte[] buf = WritePcm(pcm);
+			byte[] buf = WritePcm(pcm, len);
 			wav.Write(buf, 0, buf.Length);
 			return (buf.Length);
 		}
