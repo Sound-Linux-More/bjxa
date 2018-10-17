@@ -184,7 +184,7 @@ namespace bjxa {
 		internal uint		BlockSize;
 		internal uint		Channels;
 		internal ChannelState[]	LR;
-		internal Inflate	Inflate;
+		internal Inflate	InflateFunc;
 
 		internal DecoderState() {
 			LR = new ChannelState[2] {
@@ -216,7 +216,7 @@ namespace bjxa {
 			if (maxSamples - Samples >= Format.BLOCK_SAMPLES)
 				return (false);
 
-			if (Inflate == null)
+			if (InflateFunc == null)
 				return (false);
 
 			return (true);
@@ -239,6 +239,10 @@ namespace bjxa {
 			Assert(fmt.Blocks * fmt.BlockSizeXa == DataLength);
 
 			return (fmt);
+		}
+
+		internal byte Inflate(short[] dst, int off, byte[] src) {
+			return (InflateFunc(this, dst, off, src));
 		}
 	}
 
@@ -349,7 +353,7 @@ namespace bjxa {
 			tmp.LR[1].Prev1 = LittleEndian.ReadShort(xa, 26);
 			/* XXX: ignoring padding for now */
 
-			tmp.Inflate = BlockInflater(bits);
+			tmp.InflateFunc = BlockInflater(bits);
 			tmp.BlockSize = bits * 4 + 1;
 
 			if (magic != Format.HEADER_MAGIC || !tmp.IsValid())
@@ -472,8 +476,7 @@ namespace bjxa {
 			    pcmLen >= fmt.BlockSizePcm) {
 
 				Array.Copy(xa, xaOff, xaBuf, 0, xaBuf.Length);
-				byte prof = state.Inflate(state, pcmBuf, 0,
-				    xaBuf);
+				byte prof = state.Inflate(pcmBuf, 0, xaBuf);
 				DecodeInflated(pcmBuf, 0, prof);
 
 				xaOff += xaBuf.Length;
@@ -482,8 +485,7 @@ namespace bjxa {
 				if (state.Channels == 2) {
 					Array.Copy(xa, xaOff, xaBuf, 0,
 					    xaBuf.Length);
-					prof = state.Inflate(state, pcmBuf, 1,
-					    xaBuf);
+					prof = state.Inflate(pcmBuf, 1, xaBuf);
 					DecodeInflated(pcmBuf, 1, prof);
 
 					xaOff += xaBuf.Length;
