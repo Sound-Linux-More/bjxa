@@ -112,6 +112,14 @@ CSBUILD = $(AM_V_CCLD) $(CSC) $(CSFLAGS)
 
 .cs.exe:
 	$(CSBUILD) -target:exe -r:dotnet/libbjxa.dll -out:$@ $<
+
+DOTNET_DIST = dotnet/bjxa-$(VERSION).zip
+
+$(DOTNET_DIST): $(dotnet_binaries)
+	@rm -f $@
+	$(AM_V_GEN) zip -jq $@ $(dotnet_binaries) $(srcdir)/dotnet/*.cs
+
+all-local: $(DOTNET_DIST)
 endif
 
 noinst_SCRIPTS = $(dotnet_binaries)
@@ -142,7 +150,7 @@ SUFFIXES = $(CONFIG_SUFFIXES) $(DOCUMENTATION_SUFFIXES)
 DISTCHECK_CONFIGURE_FLAGS = --disable-docs
 DISTCLEANFILES = $(nodist_noinst_SCRIPTS) $(dist_man_MANS)
 
-CLEANFILES = $(noinst_SCRIPTS)
+CLEANFILES = $(noinst_SCRIPTS) $(DOTNET_DIST)
 
 EXTRA_DIST = \
 	bjxa.1.rst \
