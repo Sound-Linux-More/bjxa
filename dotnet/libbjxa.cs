@@ -248,14 +248,60 @@ namespace bjxa {
 		static Inflate BlockInflater(uint bits) {
 			if (bits == 4)
 				return ((dec, dst, off, src) => {
-					throw new NotImplementedException(
-						"4bit inflater");
+					Assert(off == 0 || off == 1);
+					Assert(Format.BLOCK_SAMPLES *
+					    dec.Channels == dst.Length);
+
+					byte profile = src[0];
+					int srcOff = 1;
+
+					for (uint n = Format.BLOCK_SAMPLES;
+					    n > 0; n -= 2) {
+						ushort s = src[srcOff];
+						srcOff++;
+
+						dst[off] =
+						    (short)((s & 0xf0) << 8);
+						off += (int)dec.Channels;
+						dst[off] =
+						    (short)((s & 0x0f) << 12);
+						off += (int)dec.Channels;
+					}
+
+					return (profile);
 				});
 
 			if (bits == 6)
 				return ((dec, dst, off, src) => {
-					throw new NotImplementedException(
-						"6bit inflater");
+					Assert(off == 0 || off == 1);
+					Assert(Format.BLOCK_SAMPLES *
+					    dec.Channels == dst.Length);
+
+					byte profile = src[0];
+					int srcOff = 1;
+
+					for (uint n = Format.BLOCK_SAMPLES;
+					    n > 0; n -= 4) {
+						int s = (src[srcOff] << 16) |
+						    (src[srcOff + 1] << 8) |
+						    src[srcOff + 2];
+						srcOff += 3;
+
+						dst[off] = (short)
+						    ((s & 0x00fc0000) >> 8);
+						off += (int)dec.Channels;
+						dst[off] = (short)
+						    ((s & 0x0003f000) >> 2);
+						off += (int)dec.Channels;
+						dst[off] = (short)
+						    ((s & 0x00000fc0) << 4);
+						off += (int)dec.Channels;
+						dst[off] = (short)
+						    ((s & 0x0000003f) << 10);
+						off += (int)dec.Channels;
+					}
+
+					return (profile);
 				});
 
 			if (bits == 8)
