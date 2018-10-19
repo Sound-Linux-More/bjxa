@@ -157,7 +157,6 @@ EXTRA_DIST = \
 	bjxa.3.rst \
 	bjxa.5.rst \
 	bjxa.spec \
-	bootstrap \
 	dotnet/bjxa.cs \
 	dotnet/libbjxa.cs \
 	gcov-tool.sh.in \
