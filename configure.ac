@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([bjxa], [0.1], [https://github.com/dridi/bjxa/issues])
+AC_INIT([bjxa], [0.2], [https://github.com/dridi/bjxa/issues])
 AC_COPYRIGHT([Copyright (c) 2018 Dridi Boukelmoune])
 
 AC_PREREQ([2.63])
