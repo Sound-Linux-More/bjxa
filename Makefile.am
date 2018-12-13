@@ -44,10 +44,11 @@ include_HEADERS = bjxa.h
 noinst_HEADERS = bjxa_priv.h
 
 libbjxa_la_LDFLAGS = -version-info 0:0:0
+libbjxa_la_DEPENDENCIES = $(include_HEADERS) $(noinst_HEADERS)
 
 if WITH_LD_VERSION_SCRIPT
 libbjxa_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libbjxa.map
-libbjxa.lo: libbjxa.map
+libbjxa_la_DEPENDENCIES += libbjxa.map
 endif
 
 bjxa_SOURCES = bjxa.c bjxa_decode.c
