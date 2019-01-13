@@ -454,7 +454,7 @@ namespace bjxa {
 			}
 		}
 
-		public int Decode(byte[] xa, short[] pcm) {
+		public int Decode(byte[] xa, short[] pcm, out long pcm_data) {
 			if (state == null)
 				throw new InvalidOperationException(
 				    "Decoder not ready");
@@ -478,7 +478,7 @@ namespace bjxa {
 			int blocks = 0;
 			long pcm_block = Math.Min(fmt.BlockSizePcm,
 			    fmt.DataLengthPcm);
-			long pcm_data = 0;
+			pcm_data = 0;
 
 			while (fmt.Blocks > 0 && xaLen >= fmt.BlockSizeXa &&
 			    pcmLen >= pcm_block) {

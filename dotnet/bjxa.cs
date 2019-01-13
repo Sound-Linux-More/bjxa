@@ -63,7 +63,7 @@ namespace bjxa {
 
 			byte[] buf_xa = new byte[fmt.BlockSizeXa];
 			short[] buf_pcm = new short[fmt.BlockSamples];
-			long pcm_block = fmt.BlockSizePcm;
+			long pcm_block;
 
 			while (fmt.Blocks > 0) {
 				if (xa.Read(buf_xa, 0, buf_xa.Length) !=
@@ -71,11 +71,10 @@ namespace bjxa {
 					throw new IOException(
 					    "Unexpected end of file.");
 
-				int blocks = dec.Decode(buf_xa, buf_pcm);
+				int blocks = dec.Decode(buf_xa, buf_pcm,
+				    out pcm_block);
 				Assert(blocks == 1);
-
-				pcm_block = Math.Min(pcm_block,
-				    fmt.DataLengthPcm);
+				Assert(pcm_block > 0);
 
 				fmt.WritePcm(wav, buf_pcm, pcm_block);
 				fmt.DataLengthPcm -= pcm_block;
