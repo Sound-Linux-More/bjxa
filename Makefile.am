@@ -1,4 +1,4 @@
-# Copyright (C) 2018  Dridi Boukelmoune
+# Copyright (C) 2018-2019  Dridi Boukelmoune
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -118,7 +118,11 @@ DOTNET_DIST = dotnet/bjxa-$(VERSION).zip
 
 $(DOTNET_DIST): $(dotnet_binaries)
 	@rm -f $@
-	$(AM_V_GEN) zip -jq $@ $(dotnet_binaries) $(srcdir)/dotnet/*.cs
+	$(AM_V_GEN) zip -jq $@ \
+		$(dotnet_binaries) \
+		$(srcdir)/dotnet/*.cs \
+		$(srcdir)/gpl-3.0.txt \
+		$(srcdir)/lgpl-2.1.txt
 
 all-local: $(DOTNET_DIST)
 endif
