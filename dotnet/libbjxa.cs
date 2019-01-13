@@ -248,6 +248,7 @@ namespace bjxa {
 
 	public class Decoder {
 		DecoderState state;
+		Format fmt;
 
 		static Inflate BlockInflater(uint bits) {
 			if (bits == 4)
@@ -360,6 +361,7 @@ namespace bjxa {
 				throw new FormatError("Invalid XA header");
 
 			state = tmp;
+			fmt = state.ToFormat();
 
 			return (state.ToFormat());
 		}
@@ -462,8 +464,11 @@ namespace bjxa {
 			if (pcm == null)
 				throw new ArgumentNullException(
 				    "bjxa.Decoder.Decode: pcm");
+			Assert(fmt != null);
+			if (fmt.Blocks == 0)
+				throw new InvalidOperationException(
+				    "XA stream fully decoded");
 
-			Format fmt = state.ToFormat();
 			int xaLen = xa.Length * sizeof(byte);
 			int xaOff = 0;
 			int pcmLen = pcm.Length * sizeof(short);
@@ -471,9 +476,12 @@ namespace bjxa {
 			byte[] xaBuf = new byte[state.BlockSize];
 			short[] pcmBuf = new short[fmt.BlockSamples];
 			int blocks = 0;
+			long pcm_block = Math.Min(fmt.BlockSizePcm,
+			    fmt.DataLengthPcm);
+			long pcm_data = 0;
 
-			while (xaLen >= fmt.BlockSizeXa &&
-			    pcmLen >= fmt.BlockSizePcm) {
+			while (fmt.Blocks > 0 && xaLen >= fmt.BlockSizeXa &&
+			    pcmLen >= pcm_block) {
 
 				Array.Copy(xa, xaOff, xaBuf, 0, xaBuf.Length);
 				byte prof = state.Inflate(pcmBuf, 0, xaBuf);
@@ -493,11 +501,17 @@ namespace bjxa {
 				}
 
 				Array.Copy(pcmBuf, 0, pcm, pcmOff,
-				    pcmBuf.Length);
+				    pcm_block / sizeof(short));
 				pcmOff += pcmBuf.Length;
-				pcmLen -= (int)fmt.BlockSizePcm;
+				pcmLen -= (int)pcm_block;
+				pcm_data += pcm_block;
+				fmt.DataLengthPcm -= pcm_block;
+
+				pcm_block = Math.Min(fmt.BlockSizePcm,
+				    fmt.DataLengthPcm);
 
 				blocks++;
+				fmt.Blocks--;
 			}
 
 			return (blocks);
