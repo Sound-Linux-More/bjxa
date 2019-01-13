@@ -1,3 +1,11 @@
+bjxa 0.3 (2019-01-13)
+=====================
+
+* C# dual licensing
+* libbjxa.dll progress tracking
+* libbjxa.dll API changed
+* bjxa.exe single-pass decoding
+
 bjxa 0.2 (2018-18-19)
 =====================
 
