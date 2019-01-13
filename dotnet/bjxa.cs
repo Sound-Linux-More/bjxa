@@ -56,6 +56,29 @@ namespace bjxa {
 				wav = Console.OpenStandardOutput();
 		}
 
+#if BJXA_SINGLE_PASS
+		static void Decode() {
+			Decoder dec = new Decoder();
+			Format fmt = dec.ReadHeader(xa);
+			dec.WriteRiffHeader(wav);
+
+			byte[] buf_xa =
+			    new byte[fmt.BlockSizeXa * fmt.Blocks];
+			short[] buf_pcm =
+			    new short[fmt.DataLengthPcm / sizeof(short)];
+			long pcm_block;
+
+			if (xa.Read(buf_xa, 0, buf_xa.Length) != buf_xa.Length)
+				throw new IOException("Unexpected end of file.");
+
+			int blocks = dec.Decode(buf_xa, buf_pcm,
+			    out pcm_block);
+			Assert(blocks == fmt.Blocks);
+			Assert(pcm_block == fmt.DataLengthPcm);
+
+			fmt.WritePcm(wav, buf_pcm, pcm_block);
+		}
+#else
 		static void Decode() {
 			Decoder dec = new Decoder();
 			Format fmt = dec.ReadHeader(xa);
@@ -83,6 +106,7 @@ namespace bjxa {
 
 			Assert(fmt.DataLengthPcm == 0);
 		}
+#endif
 
 		static void Exec(string[] args) {
 			if (args.Length == 0)
