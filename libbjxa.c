@@ -197,6 +197,7 @@ struct bjxa_decoder {
 	uint8_t			channels;
 	bjxa_channel_t		channel_state[2];
 	bjxa_inflate_f		*inflate_cb;
+	bjxa_format_t		fmt[1];
 };
 
 /* memory management */
@@ -352,6 +353,8 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	(void)loop;
 	(void)pad;
 
+	BJXA_PROTO_CHECK(bjxa_decode_format(&tmp, tmp.fmt) == 0);
+
 	(void)memcpy(dec, &tmp, sizeof tmp);
 	return (BJXA_HEADER_SIZE_XA);
 }
@@ -465,7 +468,7 @@ int
 bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
     size_t src_len)
 {
-	bjxa_format_t fmt;
+	bjxa_format_t *fmt;
 	const uint8_t *src_ptr;
 	int16_t *dst_ptr;
 	uint8_t profile;
@@ -474,16 +477,17 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(dst);
 	CHECK_PTR(src);
-	BJXA_TRY(bjxa_decode_format(dec, &fmt));
+	fmt = dec->fmt;
+	BJXA_COND_CHECK(fmt->blocks > 0, EPROTO);
 
-	BJXA_BUFFER_CHECK(dst_len >= fmt.block_size_pcm);
-	BJXA_BUFFER_CHECK(src_len >= fmt.block_size_xa);
+	BJXA_BUFFER_CHECK(dst_len >= fmt->block_size_pcm);
+	BJXA_BUFFER_CHECK(src_len >= fmt->block_size_xa);
 
 	dst_ptr = dst;
 	src_ptr = src;
 
-	while (dst_len >= fmt.block_size_pcm &&
-	    src_len >= fmt.block_size_xa) {
+	while (dst_len >= fmt->block_size_pcm &&
+	    src_len >= fmt->block_size_xa) {
 
 		profile = dec->inflate_cb(dec, dst_ptr, src_ptr);
 		BJXA_TRY(bjxa_decode_inflated(dec, dst_ptr, profile, 0));
@@ -500,7 +504,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 		}
 
 		dst_ptr += BJXA_BLOCK_SAMPLES * dec->channels;
-		dst_len -= fmt.block_size_pcm;
+		dst_len -= fmt->block_size_pcm;
 		blocks++;
 	}
 
