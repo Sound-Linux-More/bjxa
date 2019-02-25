@@ -472,7 +472,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	bjxa_format_t *fmt;
 	const uint8_t *src_ptr;
 	int16_t *dst_ptr, dst_buf[BJXA_BLOCK_STEREO];
-	uint8_t profile;
+	uint8_t profile, pcm_block;
 	int blocks = 0;
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
@@ -484,12 +484,17 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	BJXA_BUFFER_CHECK(dst_len >= fmt->block_size_pcm);
 	BJXA_BUFFER_CHECK(src_len >= fmt->block_size_xa);
 
+	pcm_block = fmt->block_size_pcm;
+	if (pcm_block > fmt->data_len_pcm)
+		pcm_block = fmt->data_len_pcm;
+
 	dst_ptr = dst;
 	src_ptr = src;
 
-	while (dst_len >= fmt->block_size_pcm &&
+	while (fmt->blocks > 0 && dst_len >= pcm_block &&
 	    src_len >= fmt->block_size_xa) {
 
+		assert(pcm_block > 0);
 		profile = dec->inflate_cb(dec, dst_buf, src_ptr);
 		BJXA_TRY(bjxa_decode_inflated(dec, dst_buf, profile, 0));
 
@@ -504,11 +509,16 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 			src_len -= dec->block_size;
 		}
 
-		memcpy(dst_ptr, dst_buf, fmt->block_size_pcm);
+		memcpy(dst_ptr, dst_buf, pcm_block);
 
-		dst_ptr += BJXA_BLOCK_SAMPLES * dec->channels;
-		dst_len -= fmt->block_size_pcm;
+		dst_ptr += pcm_block / sizeof *dst_ptr;
+		dst_len -= pcm_block;
 		blocks++;
+
+		fmt->data_len_pcm -= pcm_block;
+		fmt->blocks--;
+		if (pcm_block > fmt->data_len_pcm)
+			pcm_block = fmt->data_len_pcm;
 	}
 
 	return (blocks);
