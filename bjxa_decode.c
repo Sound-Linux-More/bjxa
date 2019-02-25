@@ -31,6 +31,61 @@
 #include "bjxa_priv.h"
 /* end strip */
 
+#if BJXA_SINGLE_PASS
+static int
+decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
+{
+	bjxa_format_t fmt;
+	void *buf_pcm, *buf_xa;
+	uint32_t xa_len;
+	int ret = 0;
+
+	if (bjxa_fread_header(dec, in) < 0) {
+		perror("bjxa_fread_header");
+		return (-1);
+	}
+
+	if (bjxa_decode_format(dec, &fmt) < 0) {
+		perror("bjxa_decode_format");
+		return (-1);
+	}
+
+	if (bjxa_fwrite_riff_header(dec, out) < 0) {
+		perror("bjxa_fwrite_riff_header");
+		return (-1);
+	}
+
+	/* allocate space for the whole stream */
+	xa_len = fmt.block_size_xa * fmt.blocks;
+	buf_pcm = malloc(fmt.data_len_pcm);
+	buf_xa = malloc(xa_len);
+
+	if (buf_pcm == NULL || buf_xa == NULL) {
+		perror("malloc");
+		ret = -1;
+	}
+
+	if (ret == 0 && fread(buf_xa, xa_len, 1, in) != 1) {
+		perror("fread");
+		ret = -1;
+	}
+
+	if (ret == 0 && bjxa_decode(dec, buf_pcm, fmt.data_len_pcm, buf_xa,
+	    xa_len) != (int)fmt.blocks) {
+		perror("bjxa_decode");
+		ret = -1;
+	}
+
+	if (ret == 0 && bjxa_fwrite_pcm(buf_pcm, fmt.data_len_pcm, out) < 0) {
+		perror("bjxa_fwrite_pcm");
+		ret = -1;
+	}
+
+	free(buf_pcm);
+	free(buf_xa);
+	return (ret);
+}
+#else
 static int
 decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 {
@@ -99,6 +154,7 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	free(buf_xa);
 	return (ret);
 }
+#endif
 
 int
 decode(FILE *in, FILE *out)
