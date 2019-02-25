@@ -197,11 +197,13 @@ ERRORS
 
 	**bjxa_decode()** got an invalid XA block.
 
+	**bjxa_decode()** already decoded the complete XA stream.
+
 EXAMPLE
 =======
 
 The following code demonstrates the conversion of one XA file to a WAV file
-using a decoder:
+using a decoder, either incrementally or in a single pass:
 
 .. include:: @builddir@/bjxa_decode.c.txt
     :literal:
