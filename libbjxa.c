@@ -180,6 +180,7 @@ mputs(uint8_t **buf, const char *str)
 
 #define BJXA_HEADER_MAGIC	0x3144574b
 #define BJXA_BLOCK_SAMPLES	32
+#define BJXA_BLOCK_STEREO	64
 
 typedef uint8_t bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
 
@@ -470,7 +471,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 {
 	bjxa_format_t *fmt;
 	const uint8_t *src_ptr;
-	int16_t *dst_ptr;
+	int16_t *dst_ptr, dst_buf[BJXA_BLOCK_STEREO];
 	uint8_t profile;
 	int blocks = 0;
 
@@ -489,19 +490,21 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	while (dst_len >= fmt->block_size_pcm &&
 	    src_len >= fmt->block_size_xa) {
 
-		profile = dec->inflate_cb(dec, dst_ptr, src_ptr);
-		BJXA_TRY(bjxa_decode_inflated(dec, dst_ptr, profile, 0));
+		profile = dec->inflate_cb(dec, dst_buf, src_ptr);
+		BJXA_TRY(bjxa_decode_inflated(dec, dst_buf, profile, 0));
 
 		src_ptr += dec->block_size;
 		src_len -= dec->block_size;
 
 		if (dec->channels == 2) {
-			profile = dec->inflate_cb(dec, dst_ptr + 1, src_ptr);
-			BJXA_TRY(bjxa_decode_inflated(dec, dst_ptr + 1,
+			profile = dec->inflate_cb(dec, dst_buf + 1, src_ptr);
+			BJXA_TRY(bjxa_decode_inflated(dec, dst_buf + 1,
 			    profile, 1));
 			src_ptr += dec->block_size;
 			src_len -= dec->block_size;
 		}
+
+		memcpy(dst_ptr, dst_buf, fmt->block_size_pcm);
 
 		dst_ptr += BJXA_BLOCK_SAMPLES * dec->channels;
 		dst_len -= fmt->block_size_pcm;
