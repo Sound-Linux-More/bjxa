@@ -31,6 +31,28 @@
 #include "bjxa_priv.h"
 /* end strip */
 
+static int
+decode_header(bjxa_decoder_t *dec, FILE *in, FILE *out, bjxa_format_t *fmt)
+{
+
+	if (bjxa_fread_header(dec, in) < 0) {
+		perror("bjxa_fread_header");
+		return (-1);
+	}
+
+	if (bjxa_decode_format(dec, fmt) < 0) {
+		perror("bjxa_decode_format");
+		return (-1);
+	}
+
+	if (bjxa_fwrite_riff_header(dec, out) < 0) {
+		perror("bjxa_fwrite_riff_header");
+		return (-1);
+	}
+
+	return (0);
+}
+
 #if BJXA_SINGLE_PASS
 static int
 decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
@@ -40,20 +62,8 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	uint32_t xa_len;
 	int ret = 0;
 
-	if (bjxa_fread_header(dec, in) < 0) {
-		perror("bjxa_fread_header");
+	if (decode_header(dec, in, out, &fmt) < 0)
 		return (-1);
-	}
-
-	if (bjxa_decode_format(dec, &fmt) < 0) {
-		perror("bjxa_decode_format");
-		return (-1);
-	}
-
-	if (bjxa_fwrite_riff_header(dec, out) < 0) {
-		perror("bjxa_fwrite_riff_header");
-		return (-1);
-	}
 
 	/* allocate space for the whole stream */
 	xa_len = fmt.block_size_xa * fmt.blocks;
@@ -94,20 +104,8 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	uint32_t pcm_block;
 	int ret = 0;
 
-	if (bjxa_fread_header(dec, in) < 0) {
-		perror("bjxa_fread_header");
+	if (decode_header(dec, in, out, &fmt) < 0)
 		return (-1);
-	}
-
-	if (bjxa_decode_format(dec, &fmt) < 0) {
-		perror("bjxa_decode_format");
-		return (-1);
-	}
-
-	if (bjxa_fwrite_riff_header(dec, out) < 0) {
-		perror("bjxa_fwrite_riff_header");
-		return (-1);
-	}
 
 	/* allocate space for exactly one block */
 	buf_pcm = malloc(fmt.block_size_pcm);
