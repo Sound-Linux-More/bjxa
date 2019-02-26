@@ -34,6 +34,7 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_CC_C99
 
+BJXA_ARG_ENABLE([single pass])
 BJXA_ARG_ENABLE([warnings])
 BJXA_ARG_ENABLE([hardening])
 BJXA_ARG_ENABLE([asan])
@@ -185,6 +186,13 @@ AC_CONFIG_FILES([
 	bjxa.spec
 ])
 
+# Single pass
+if test "$enable_single_pass" != no
+then
+	BJXA_ADD_CFLAGS([CFLAGS], [-DBJXA_SINGLE_PASS])
+	CSFLAGS="-d:BJXA_SINGLE_PASS $CSFLAGS"
+fi
+
 AC_OUTPUT
 
 AS_ECHO("
@@ -201,6 +209,7 @@ AS_ECHO("
 	ld version script: $with_ld_version_script
 
 	--enable-silent-rules=${enable_silent_rules:-no}
+	--enable-single-pass=$enable_single_pass
 	--enable-warnings=$enable_warnings
 	--enable-hardening=$enable_hardening
 	--enable-lcov=$enable_lcov
@@ -212,6 +221,7 @@ AS_ECHO("
 	--with-dotnet=$with_dotnet
 
 	CSC=$CSC
+	CSFLAGS=$CSFLAGS
 	RST2MAN=$RST2MAN
 	XXD=$XXD
 	SHA1=$SHA1
