@@ -155,7 +155,7 @@ ADD_TEST_CASE(decoding)
 
 	assert(bjxa_decode(dec, dst_buf, sizeof dst_buf, src_buf,
 	    sizeof src_buf) == -1);
-	assert(errno == EINVAL);
+	assert(errno == EPROTO);
 
 	file = fopen("test/square-mono-4.xa", "r");
 	assert(file != NULL);
