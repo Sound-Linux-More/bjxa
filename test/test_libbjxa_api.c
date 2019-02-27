@@ -181,6 +181,11 @@ ADD_TEST_CASE(decoding)
 	assert(bjxa_decode(dec, dst_buf, fmt.block_size_pcm,
 	    src_buf, fmt.block_size_xa * 2) == 1);
 
+	/* decode past the last block */
+	while (bjxa_decode(dec, dst_buf, fmt.block_size_pcm, src_buf,
+	    fmt.block_size_xa) == 1);
+	assert(errno == EPROTO);
+
 	assert(bjxa_free_decoder(&dec) == 0);
 	assert(dec == NULL);
 	free(junk);
