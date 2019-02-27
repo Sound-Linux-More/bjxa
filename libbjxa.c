@@ -479,7 +479,8 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	CHECK_PTR(dst);
 	CHECK_PTR(src);
 	fmt = dec->fmt;
-	BJXA_COND_CHECK(fmt->blocks > 0, EPROTO);
+	BJXA_COND_CHECK(fmt->sample_bits > 0, EINVAL);
+	BJXA_PROTO_CHECK(fmt->blocks > 0);
 
 	BJXA_BUFFER_CHECK(dst_len >= fmt->block_size_pcm);
 	BJXA_BUFFER_CHECK(src_len >= fmt->block_size_xa);
