@@ -1,3 +1,10 @@
+bjxa 0.4 (2019-03-15)
+=====================
+
+* libbjxa progress tracking
+* bjxa single-pass decoding
+* single-pass configure option
+
 bjxa 0.3 (2019-01-13)
 =====================
 
