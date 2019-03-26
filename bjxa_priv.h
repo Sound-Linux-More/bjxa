@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018  Dridi Boukelmoune
+ * Copyright (C) 2018-2019  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,5 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef noreturn
+#  define noreturn __attribute__((__noreturn__))
+#endif
 
 int decode(FILE *, FILE *);

@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018  Dridi Boukelmoune
+ * Copyright (C) 2018-2019  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,15 @@ usage(FILE* file)
 	    progname);
 }
 
+static noreturn int
+cmd_fail(const char *msg)
+{
+
+	fprintf(stderr, "bjxa: %s\n", msg);
+	usage(stderr);
+	exit(EXIT_FAILURE);
+}
+
 static int
 open_files(int argc, char * const *argv)
 {
@@ -81,11 +90,8 @@ main(int argc, char * const *argv)
 	argc--;
 	argv++;
 
-	if (argc == 0) {
-		fprintf(stderr, "bjxa: Missing an action\n");
-		usage(stderr);
-		return (EXIT_FAILURE);
-	}
+	if (argc == 0)
+		cmd_fail("Missing an action");
 
 	if (!strcmp("help", *argv)) {
 		usage(stdout);
@@ -94,18 +100,13 @@ main(int argc, char * const *argv)
 	else if (!strcmp("decode", *argv)) {
 		argc--;
 		argv++;
-		if (argc > 2) {
-			fprintf(stderr, "bjxa: Too many arguments\n");
-			usage(stderr);
-			return (EXIT_FAILURE);
-		}
+		if (argc > 2)
+			cmd_fail("Too many arguments");
 		if (open_files(argc, argv) < 0 || decode(stdin, stdout) < 0)
 			return (EXIT_FAILURE);
 	}
 	else {
-		fprintf(stderr, "bjxa: Unknown action\n");
-		usage(stderr);
-		return (EXIT_FAILURE);
+		cmd_fail("Unknown action");
 	}
 
 	return (EXIT_SUCCESS);
