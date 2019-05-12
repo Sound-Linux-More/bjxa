@@ -1,4 +1,4 @@
-# Copyright (C) 2018  Dridi Boukelmoune
+# Copyright (C) 2018-2019  Dridi Boukelmoune
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,34 +54,27 @@ BJXA_CHECK_CFLAGS([CFLAGS], [
 	-D_XOPEN_SOURCE=600
 ])
 
-# ABI
-AM_CONDITIONAL([WITH_LD_VERSION_SCRIPT],
-	[test "$with_ld_version_script" != no])
-
 # Documentation
-AM_CONDITIONAL([WITH_DOCUMENTATION], [test "$with_documentation" != no])
-test "$with_documentation" != "no" &&
-BJXA_CHECK_PROG([RST2MAN], [rst2man rst2man.py], [required for documentation])
+AM_COND_IF([WITH_DOCUMENTATION],
+	[BJXA_CHECK_PROG([RST2MAN],
+		[rst2man rst2man.py], [required for documentation])])
 
 # Test suite
 BJXA_CHECK_PROG([XXD], [xxd], [required by the test suite])
 BJXA_CHECK_PROG([SHA1], [sha1 sha1sum], [required by the test suite])
 
 # Dynamic analysis
-test "$enable_asan" != no &&
-BJXA_ADD_CFLAGS([CFLAGS], [-fno-omit-frame-pointer -fsanitize=address])
+AM_COND_IF([ENABLE_ASAN],
+	[BJXA_ADD_CFLAGS([CFLAGS],
+		[-fno-omit-frame-pointer -fsanitize=address])])
 
-test "$enable_msan" != no &&
-BJXA_ADD_CFLAGS([CFLAGS], [-fsanitize=memory])
+AM_COND_IF([ENABLE_MSAN], [BJXA_ADD_CFLAGS([CFLAGS], [-fsanitize=memory])])
 
-test "$enable_ubsan" != no &&
-BJXA_ADD_CFLAGS([CFLAGS], [-fsanitize=undefined])
+AM_COND_IF([ENABLE_UBSAN],
+	[BJXA_ADD_CFLAGS([CFLAGS], [-fsanitize=undefined])])
 
 # Coverage
-AM_CONDITIONAL([LCOV_ENABLED], [test "$enable_lcov" != no])
-
-if test "$enable_lcov" != no
-then
+AM_COND_IF([ENABLE_LCOV], [
 	BJXA_CHECK_PROG([LCOV], [lcov], [code coverage])
 	BJXA_CHECK_PROG([GCOV], [gcov], [required by lcov])
 	BJXA_CHECK_PROG([GENHTML], [genhtml], [required by lcov])
@@ -103,11 +96,10 @@ then
 	fi
 
 	LCOV="$LCOV --gcov-tool '[\$](abs_top_builddir)/gcov-tool.sh'"
-fi
+])
 
 # Warnings
-if test "$enable_warnings" != no
-then
+AM_COND_IF([ENABLE_WARNINGS], [
 	# FreeBSD's WARNS level 6
 	BJXA_CHECK_CFLAGS([CFLAGS], [
 		-Werror
@@ -161,21 +153,19 @@ then
 		-Wsparse-all
 		-Wsparse-error
 	])
-fi
+])
 
 # Hardening
-if test "$enable_hardening" != no
-then
+AM_COND_IF([ENABLE_HARDENING], [
 	BJXA_CHECK_CFLAGS([CFLAGS], [
 		-fstack-clash-protection
 		-fstack-protector
 	])
-fi
+])
 
 # C#
-AM_CONDITIONAL([WITH_DOTNET], [test "$with_dotnet" != no])
-test "$with_dotnet" != no &&
-BJXA_CHECK_PROG([CSC], [csc mcs], [C# compiler for dotnet builds])
+AM_COND_IF([WITH_DOTNET],
+	[BJXA_CHECK_PROG([CSC], [csc mcs], [C# compiler for dotnet builds])])
 AC_ARG_VAR([CSFLAGS], [C# compiler flags])
 
 # Configured files

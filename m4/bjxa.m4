@@ -1,4 +1,4 @@
-# Copyright (C) 2018  Dridi Boukelmoune
+# Copyright (C) 2018-2019  Dridi Boukelmoune
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# _BJXA_CONDITIONAL(TYPE, NAME)
+# -----------------------------
+AC_DEFUN([_BJXA_CONDITIONAL], [dnl
+	AM_CONDITIONAL(m4_toupper($1[]_[]m4_translit([$2], [ ], [_])),
+		[test "$[]$1_[]m4_translit([$2], [ ], [_])" != no])
+])
+
 # BJXA_ARG_ENABLE(FEATURE)
 # ------------------------
 AC_DEFUN([BJXA_ARG_ENABLE], [dnl
@@ -21,6 +28,7 @@ AC_DEFUN([BJXA_ARG_ENABLE], [dnl
 			[enable $1])],
 		[],
 		[enable_[]m4_translit([$1], [ ], [_])=no])
+	_BJXA_CONDITIONAL([enable], [$1])
 ])
 
 # BJXA_ARG_WITH(FEATURE)
@@ -31,6 +39,7 @@ AC_DEFUN([BJXA_ARG_WITH], [dnl
 			[with $1])],
 		[],
 		[with_[]m4_translit([$1], [ ], [_])=no])
+	_BJXA_CONDITIONAL([with], [$1])
 ])
 
 # BJXA_ARG_WITHOUT(FEATURE)
@@ -41,6 +50,7 @@ AC_DEFUN([BJXA_ARG_WITHOUT], [dnl
 			[without $1])],
 		[],
 		[with_[]m4_translit([$1], [ ], [_])=yes])
+	_BJXA_CONDITIONAL([with], [$1])
 ])
 
 # _BJXA_CHECK_CFLAGS
@@ -138,7 +148,7 @@ AC_MSG_ERROR([Could not find program $2])
 ])
 
 # BJXA_COND_PROG(VARIABLE, PROGS, DESC)
-# --------------------------------------
+# -------------------------------------
 AC_DEFUN([BJXA_COND_PROG], [
 AC_ARG_VAR([$1], [$3])
 AC_CHECK_PROGS([$1], [$2], [no])
@@ -146,7 +156,7 @@ AM_CONDITIONAL([HAVE_$1], [test "$$1" != no])
 ])
 
 # BJXA_COND_MODULE(VARIABLE, MODULE)
-# -----------------------------------
+# ----------------------------------
 AC_DEFUN([BJXA_COND_MODULE], [
 PKG_CHECK_MODULES([$1], [$2], [$1=yes], [$1=no])
 AC_SUBST([$1])
