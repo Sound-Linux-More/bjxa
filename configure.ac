@@ -64,9 +64,10 @@ BJXA_CHECK_PROG([XXD], [xxd], [required by the test suite])
 BJXA_CHECK_PROG([SHA1], [sha1 sha1sum], [required by the test suite])
 
 # Dynamic analysis
-AM_COND_IF([ENABLE_ASAN],
-	[BJXA_ADD_CFLAGS([CFLAGS],
-		[-fno-omit-frame-pointer -fsanitize=address])])
+AM_COND_IF([ENABLE_ASAN], [BJXA_ADD_CFLAGS([CFLAGS], [
+	-fno-omit-frame-pointer
+	-fsanitize=address
+])])
 
 AM_COND_IF([ENABLE_MSAN], [BJXA_ADD_CFLAGS([CFLAGS], [-fsanitize=memory])])
 
@@ -177,11 +178,10 @@ AC_CONFIG_FILES([
 ])
 
 # Single pass
-if test "$enable_single_pass" != no
-then
+AM_COND_IF([ENABLE_SINGLE_PASS], [
 	BJXA_ADD_CFLAGS([CFLAGS], [-DBJXA_SINGLE_PASS])
 	CSFLAGS="-d:BJXA_SINGLE_PASS $CSFLAGS"
-fi
+])
 
 AC_OUTPUT
 
