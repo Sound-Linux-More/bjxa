@@ -76,7 +76,7 @@ bjxa_3_links = \
 dist_doc_DATA = README.rst
 dist_man_MANS = bjxa.1 bjxa.3 bjxa.5 $(bjxa_3_links)
 
-if WITH_DOCUMENTATION
+if MAINTAINER_MODE
 DOCUMENTATION_SUFFIXES = \
 	.1 .1.rst \
 	.3 .3.rst \

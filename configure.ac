@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_INIT([bjxa], [0.4], [https://github.com/dridi/bjxa/issues])
-AC_COPYRIGHT([Copyright (c) 2018-2019 Dridi Boukelmoune])
+AC_COPYRIGHT([Copyright (c) 2018-2020 Dridi Boukelmoune])
 
 AC_PREREQ([2.63])
 AC_REVISION([revision 1])
@@ -24,6 +24,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE([1.12 foreign subdir-objects])
+AM_MAINTAINER_MODE([disable])
 AM_SILENT_RULES([no])
 AM_SANITY_CHECK
 
@@ -43,7 +44,6 @@ BJXA_ARG_ENABLE([ubsan])
 BJXA_ARG_ENABLE([lcov])
 
 BJXA_ARG_WITHOUT([ld version script])
-BJXA_ARG_WITH([documentation])
 BJXA_ARG_WITH([dotnet])
 
 # Standards compliance
@@ -55,7 +55,7 @@ BJXA_CHECK_CFLAGS([CFLAGS], [
 ])
 
 # Documentation
-AM_COND_IF([WITH_DOCUMENTATION],
+AM_COND_IF([MAINTAINER_MODE],
 	[BJXA_CHECK_PROG([RST2MAN],
 		[rst2man rst2man.py], [required for documentation])])
 
@@ -209,7 +209,6 @@ AS_ECHO("
 	--enable-msan=$enable_msan
 	--enable-ubsan=$enable_ubsan
 
-	--with-documentation=$with_documentation
 	--with-dotnet=$with_dotnet
 
 	CSC=$CSC

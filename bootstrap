@@ -13,9 +13,9 @@ autoreconf -i
 
 cd "$WORK_DIR"
 "$ROOT_DIR"/configure \
+	--enable-maintainer-mode \
 	--enable-warnings \
 	--enable-hardening \
 	--enable-silent-rules \
-	--with-documentation \
 	--with-dotnet \
 	"$@"
