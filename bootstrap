@@ -3,15 +3,12 @@
 set -e
 set -u
 
-WORK_DIR=$(pwd)
 ROOT_DIR=$(dirname "$0")
 
 test -n "$ROOT_DIR"
-cd "$ROOT_DIR"
 
-autoreconf -i
+autoreconf -i "$ROOT_DIR"
 
-cd "$WORK_DIR"
 "$ROOT_DIR"/configure \
 	--enable-maintainer-mode \
 	--enable-warnings \
