@@ -177,6 +177,8 @@ AC_CONFIG_FILES([
 	bjxa.spec
 ])
 
+AC_CONFIG_COMMANDS([mkdir], [$MKDIR_P test dotnet])
+
 # Single pass
 AM_COND_IF([ENABLE_SINGLE_PASS], [
 	BJXA_ADD_CFLAGS([CFLAGS], [-DBJXA_SINGLE_PASS])

@@ -27,7 +27,6 @@ nodist_noinst_SCRIPTS = \
 CONFIG_SUFFIXES = .sh.in .sh
 
 .sh.in.sh:
-	@mkdir -p test
 	$(AM_V_GEN) $(SED) \
 		-e 's:[@]builddir[@]:$(abs_top_builddir):' \
 		-e 's:[@]GCOV[@]:$(GCOV):' \
@@ -108,7 +107,6 @@ dotnet/bjxa.exe: dotnet/libbjxa.dll
 CSBUILD = $(AM_V_CCLD) $(CSC) $(CSFLAGS)
 
 .cs.dll:
-	@mkdir -p dotnet/
 	$(CSBUILD) -target:library -out:$@ $<
 
 .cs.exe:
