@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018  Dridi Boukelmoune
+ * Copyright (C) 2018-2020  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ decode_header(bjxa_decoder_t *dec, FILE *in, FILE *out, bjxa_format_t *fmt)
 	return (0);
 }
 
-#if BJXA_SINGLE_PASS
+#ifdef BJXA_SINGLE_PASS
 static int
 decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 {
@@ -95,7 +95,7 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	free(buf_xa);
 	return (ret);
 }
-#else
+#else /* BJXA_SINGLE_PASS */
 static int
 decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 {
@@ -152,7 +152,7 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	free(buf_xa);
 	return (ret);
 }
-#endif
+#endif /* BJXA_SINGLE_PASS */
 
 int
 decode(FILE *in, FILE *out)

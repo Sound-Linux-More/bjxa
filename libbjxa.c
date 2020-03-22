@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018  Dridi Boukelmoune
+ * Copyright (C) 2018-2020  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +106,8 @@ mread_le(const uint8_t **buf, unsigned bits)
 
 	assert(buf != NULL);
 	assert(*buf != NULL);
+	assert(bits > 0);
+	assert(bits % 8 == 0);
 
 	while (n < bits) {
 		res |= (uint32_t)(**buf << n);
@@ -149,16 +151,17 @@ mread_le32(const uint8_t **buf)
 static void
 mwrite_le(uint8_t **buf, uint32_t val, unsigned bits)
 {
-	unsigned n = 0;
 
 	assert(buf != NULL);
 	assert(*buf != NULL);
+	assert(bits > 0);
+	assert(bits % 8 == 0);
 
-	while (n < bits) {
+	while (bits > 0) {
 		**buf = (uint8_t)val;
 		val >>= 8;
 		*buf += 1;
-		n += 8;
+		bits -= 8;
 	}
 }
 
@@ -172,6 +175,7 @@ mputs(uint8_t **buf, const char *str)
 	assert(*buf != NULL);
 
 	len = strlen(str);
+	assert(len > 0);
 	(void)memcpy(*buf, str, len);
 	*buf += len;
 }
@@ -429,7 +433,7 @@ bjxa_decode_inflated(bjxa_decoder_t *dec, int16_t *dst, uint8_t profile,
 			sample = INT16_MAX;
 
 		/* propagate sample */
-		*dst = (int16_t)(sample);
+		*dst = (int16_t)sample;
 		state->prev[1] = state->prev[0];
 		state->prev[0] = *dst;
 
@@ -487,7 +491,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 
 	pcm_block = fmt->block_size_pcm;
 	if (pcm_block > fmt->data_len_pcm)
-		pcm_block = fmt->data_len_pcm;
+		pcm_block = (uint8_t)fmt->data_len_pcm;
 
 	dst_ptr = dst;
 	src_ptr = src;
@@ -519,7 +523,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 		fmt->data_len_pcm -= pcm_block;
 		fmt->blocks--;
 		if (pcm_block > fmt->data_len_pcm)
-			pcm_block = fmt->data_len_pcm;
+			pcm_block = (uint8_t)fmt->data_len_pcm;
 	}
 
 	return (blocks);
@@ -592,10 +596,8 @@ bjxa_dump_pcm(void *dst, const int16_t *src, size_t len)
 	out = dst;
 
 	while (len > 0) {
-		out[0] = (uint8_t)(*src & 0xff);
-		out[1] = (uint8_t)(*src >> 8);
+		mwrite_le(&out, (uint32_t)*src, 16);
 		src++;
-		out += 2;
 		len -= 2;
 	}
 
@@ -608,6 +610,10 @@ bjxa_fwrite_pcm(const int16_t *src, size_t len, FILE *file)
 	int16_t buf[BJXA_BLOCK_SAMPLES];
 	size_t buf_len = sizeof buf;
 	int ret;
+
+#ifdef NDEBUG
+	(void)ret;
+#endif
 
 	CHECK_PTR(src);
 	CHECK_PTR(file);
