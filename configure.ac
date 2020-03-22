@@ -177,7 +177,12 @@ AC_CONFIG_FILES([
 	bjxa.spec
 ])
 
-AC_CONFIG_COMMANDS([mkdir], [$MKDIR_P test dotnet])
+AC_CONFIG_FILES([
+	gcov-tool.sh
+	test/run.sh
+], [chmod +x $ac_file])
+
+AC_CONFIG_COMMANDS([mkdir], [$MKDIR_P dotnet])
 
 # Single pass
 AM_COND_IF([ENABLE_SINGLE_PASS], [

@@ -18,23 +18,6 @@ ACLOCAL_AMFLAGS = -I m4
 include lcov.am
 include rpm.am
 
-# Configuration
-
-nodist_noinst_SCRIPTS = \
-	gcov-tool.sh \
-	test/run.sh
-
-CONFIG_SUFFIXES = .sh.in .sh
-
-.sh.in.sh:
-	$(AM_V_GEN) $(SED) \
-		-e 's:[@]builddir[@]:$(abs_top_builddir):' \
-		-e 's:[@]GCOV[@]:$(GCOV):' \
-		-e 's:[@]SHA1[@]:$(SHA1):' \
-		-e 's:[@]XXD[@]:$(XXD):' \
-		<'$<' >$@
-	chmod +x $@
-
 # Binaries
 
 lib_LTLIBRARIES = libbjxa.la
@@ -162,12 +145,10 @@ EXTRA_DIST = \
 	bjxa.spec \
 	dotnet/bjxa.cs \
 	dotnet/libbjxa.cs \
-	gcov-tool.sh.in \
 	libbjxa.map \
 	strip-c-source.sh \
 	test/hex_decode \
 	test/hex_encode \
-	test/run.sh.in \
 	test/square-mono-4.xa \
 	test/square-mono-6.xa \
 	test/square-mono-8.xa \

@@ -3,7 +3,7 @@
 set -e
 set -u
 
-PATH=@builddir@:$PATH
+PATH=@abs_top_builddir@:$PATH
 
 export SHA1='@SHA1@'
 export XXD='@XXD@'
