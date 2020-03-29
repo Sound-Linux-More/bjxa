@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018  Dridi Boukelmoune
+ * Copyright (C) 2018-2020  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #define BJXA_HEADER_SIZE_RIFF	44
 
 typedef struct bjxa_decoder bjxa_decoder_t;
+typedef struct bjxa_encoder bjxa_encoder_t;
 
 typedef struct {
 	uint32_t	data_len_pcm;
@@ -29,6 +30,8 @@ typedef struct {
 	uint8_t		sample_bits;
 	uint8_t		channels;
 } bjxa_format_t;
+
+/* decoder */
 
 bjxa_decoder_t * bjxa_decoder(void);
 int bjxa_free_decoder(bjxa_decoder_t **);
@@ -44,3 +47,8 @@ ssize_t bjxa_fwrite_riff_header(bjxa_decoder_t *, FILE *);
 
 int bjxa_dump_pcm(void *, const int16_t *, size_t);
 int bjxa_fwrite_pcm(const int16_t *, size_t, FILE *);
+
+/* encoder */
+
+bjxa_encoder_t * bjxa_encoder(void);
+int bjxa_free_encoder(bjxa_encoder_t **);

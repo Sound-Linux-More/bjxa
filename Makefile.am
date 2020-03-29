@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019  Dridi Boukelmoune
+# Copyright (C) 2018-2020  Dridi Boukelmoune
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ bin_PROGRAMS = bjxa
 include_HEADERS = bjxa.h
 noinst_HEADERS = bjxa_priv.h
 
-libbjxa_la_LDFLAGS = -version-info 0:0:0
+libbjxa_la_LDFLAGS = -version-info 1:0:1
 libbjxa_la_DEPENDENCIES = $(include_HEADERS) $(noinst_HEADERS)
 
 if WITH_LD_VERSION_SCRIPT
@@ -50,8 +50,10 @@ bjxa_3_links = \
 	bjxa_decoder.3 \
 	bjxa_dump_pcm.3 \
 	bjxa_dump_riff_header.3 \
+	bjxa_encoder.3 \
 	bjxa_fread_header.3 \
 	bjxa_free_decoder.3 \
+	bjxa_free_encoder.3 \
 	bjxa_fwrite_pcm.3 \
 	bjxa_fwrite_riff_header.3 \
 	bjxa_parse_header.3

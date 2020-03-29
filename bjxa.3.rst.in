@@ -1,4 +1,4 @@
-.. Copyright (C) 2018  Dridi Boukelmoune
+.. Copyright (C) 2018-2020  Dridi Boukelmoune
 ..
 .. This program is free software: you can redistribute it and/or modify
 .. it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ SYNOPSIS
 | **#define** *BJXA_HEADER_SIZE_RIFF*
 |
 | **typedef struct bjxa_decoder bjxa_decoder_t;**
+| **typedef struct bjxa_encoder bjxa_encoder_t;**
 |
 | **typedef struct {**
 |     **uint32_t**    *data_len_pcm*\ **;**
@@ -59,6 +60,8 @@ SYNOPSIS
 |     **uint8_t**     *sample_bits*\ **;**
 |     **uint8_t**     *channels*\ **;**
 | **} bjxa_format_t;**
+|
+| /\* decoder \*/
 |
 | **bjxa_decoder_t * bjxa_decoder(void);**
 | **int bjxa_free_decoder(bjxa_decoder_t \*\***\ *decp*\ **);**
@@ -83,14 +86,20 @@ SYNOPSIS
       **size_t** *len*\ **);**
 | **int bjxa_fwrite_pcm(const int16_t \***\ *src*\ **, size_t** *len*\ **,** \
       **FILE \***\ *file*\ **);**
+|
+| /\* encoder \*/
+|
+| **bjxa_encoder_t * bjxa_encoder(void);**
+| **int bjxa_free_encoder(bjxa_encoder_t \*\***\ *encp*\ **);**
 
 DESCRIPTION
 ===========
 
-**bjxa_decoder()** allocates a decoder for a single XA file at a time.
+**bjxa_decoder()** and **bjxa_encoder()** respectively allocate a decoder or
+an encoder for a single XA file at a time.
 
-**bjxa_free_decoder()** takes a pointer to a decoder, frees the decoder and
-clears the pointer.
+**bjxa_free_decoder()** and **bjxa_free_encoder()** respectively take pointers
+to a decoder or an encoder, free the codecs and clear the pointers.
 
 **bjxa_parse_header()** and **bjxa_fread_header()** parse the header of an XA
 file respectively from memory or from a file. On success, the decoder is ready
@@ -115,9 +124,9 @@ be truncated if the number of remaining samples is less than the contents of a
 full XA block. The field *data_len_pcm* can be used to keep track of how many
 bytes were decoded over iterations.
 
-A decoder is not MT-Safe. The **bjxa_decoder()** function is MT-Safe but any
-function taking a **bjxa_decoder_t** argument is not. A **bjxa_decoder_t**
-should be manipulated by a single thread at a time.
+A codec is not MT-Safe. However **bjxa_decoder()** and **bjxa_encoder()**
+functions are MT-Safe but any function taking a codec argument is not. A
+codec should be manipulated by a single thread at a time.
 
 **bjxa_dump_pcm()** and **bjxa_fwrite_pcm()** write PCM samples respectively
 to memory or to a file, regardless of the host byte order. *len* is always
@@ -155,11 +164,15 @@ ERRORS
 
 	*dec* or *src* or *dst* or *file* or *fmt* is null.
 
+	*encp* is a null pointer or a pointer to a null encoder.
+
 **EINVAL**
 
 	*decp* is not a pointer to a valid decoder.
 
 	*dec* is not a valid decoder, or a decoder not in a ready state.
+
+	*encp* is not a pointer to a valid encoder.
 
 **EIO**
 
@@ -189,6 +202,8 @@ ERRORS
 
 	**bjxa_decoder()** could not allocate a decoder.
 
+	**bjxa_encoder()** could not allocate an encoder.
+
 **EPROTO**
 
 	**bjxa_parse_header()** could not parse a valid XA header.
@@ -211,7 +226,7 @@ using a decoder, either incrementally or in a single pass:
 BUGS
 ====
 
-**libbjxa** does not support the *nLoopPtr* field from the XA file header.
+**libbjxa** does not understand the *nLoopPtr* field from the XA file header.
 
 SEE ALSO
 ========

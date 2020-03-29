@@ -205,6 +205,11 @@ struct bjxa_decoder {
 	bjxa_format_t		fmt[1];
 };
 
+struct bjxa_encoder {
+	uint32_t		magic;
+#define BJXA_ENCODER_MAGIC	0xac12f1dd
+};
+
 /* memory management */
 
 bjxa_decoder_t *
@@ -223,6 +228,25 @@ bjxa_free_decoder(bjxa_decoder_t **decp)
 
 	TAKE_OBJ(dec, decp, BJXA_DECODER_MAGIC);
 	FREE_OBJ(dec);
+	return (0);
+}
+
+bjxa_encoder_t *
+bjxa_encoder(void)
+{
+	bjxa_encoder_t *enc;
+
+	ALLOC_OBJ(enc, BJXA_ENCODER_MAGIC);
+	return (enc);
+}
+
+int
+bjxa_free_encoder(bjxa_encoder_t **encp)
+{
+	bjxa_encoder_t *enc;
+
+	TAKE_OBJ(enc, encp, BJXA_ENCODER_MAGIC);
+	FREE_OBJ(enc);
 	return (0);
 }
 
