@@ -186,7 +186,8 @@ mputs(uint8_t **buf, const char *str)
 #define BJXA_BLOCK_SAMPLES	32
 #define BJXA_BLOCK_STEREO	64
 
-typedef uint8_t bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
+typedef uint8_t	bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
+typedef void	bjxa_deflate_f(bjxa_encoder_t *, uint8_t *, const int16_t *);
 
 typedef struct {
 	int16_t			prev[2];
@@ -208,6 +209,14 @@ struct bjxa_decoder {
 struct bjxa_encoder {
 	uint32_t		magic;
 #define BJXA_ENCODER_MAGIC	0xac12f1dd
+	uint32_t		data_len;
+	uint32_t		samples;
+	uint16_t		samples_rate;
+	uint8_t			block_size;
+	uint8_t			channels;
+	bjxa_channel_t		channel_state[2];
+	bjxa_deflate_f		*deflate_cb;
+	bjxa_format_t		fmt[1];
 };
 
 /* memory management */
@@ -323,6 +332,67 @@ bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 	}
 
 	return (profile);
+}
+
+/* deflate XA blocks */
+
+static void
+bjxa_deflate_4bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+{
+	unsigned n, chan;
+
+	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
+	assert(enc->channels == 1 || enc->channels == 2);
+
+	chan = enc->channels;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 2) {
+		*dst = ((uint16_t)*src >> 12) << 4; src += chan;
+		*dst |= (uint16_t)*src >> 12;       src += chan;
+		dst++;
+	}
+}
+
+static void
+bjxa_deflate_6bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+{
+	unsigned n, chan;
+	uint32_t samples;
+
+	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
+	assert(enc->channels == 1 || enc->channels == 2);
+
+	chan = enc->channels;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 4) {
+		samples  = (uint32_t)((uint16_t)*src >> 10) << 18; src += chan;
+		samples |= (uint32_t)((uint16_t)*src >> 10) << 12; src += chan;
+		samples |= (uint32_t)((uint16_t)*src >> 10) << 6;  src += chan;
+		samples |= (uint32_t)((uint16_t)*src >> 10);       src += chan;
+
+		assert(samples >> 24 == 0);
+		dst[0] = samples >> 16;
+		dst[1] = (samples >> 8) & 0xff;
+		dst[2] = samples & 0xff;
+		dst += 3;
+	}
+}
+
+static void
+bjxa_deflate_8bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+{
+	unsigned n, chan;
+
+	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
+	assert(enc->channels == 1 || enc->channels == 2);
+
+	chan = enc->channels;
+
+	for (n = BJXA_BLOCK_SAMPLES; n > 0; n--) {
+		*dst = ((uint16_t)*src) >> 8;
+		dst++;
+		src += chan;
+	}
 }
 
 /* XA header */
@@ -507,7 +577,7 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	CHECK_PTR(dst);
 	CHECK_PTR(src);
 	fmt = dec->fmt;
-	BJXA_COND_CHECK(fmt->sample_bits > 0, EINVAL);
+	BJXA_COND_CHECK(fmt->sample_bits == 16, EINVAL);
 	BJXA_PROTO_CHECK(fmt->blocks > 0);
 
 	BJXA_BUFFER_CHECK(dst_len >= fmt->block_size_pcm);
@@ -551,6 +621,53 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	}
 
 	return (blocks);
+}
+
+/* encode XA blocks */
+
+int
+bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
+{
+	bjxa_encoder_t tmp;
+
+	CHECK_OBJ(enc, BJXA_ENCODER_MAGIC);
+	CHECK_PTR(fmt);
+	BJXA_COND_CHECK(fmt->sample_bits == 16, EINVAL);
+	BJXA_COND_CHECK(bits == 4 || bits == 6 || bits == 8, EINVAL);
+	BJXA_COND_CHECK(fmt->blocks == 0, EINVAL);
+
+	INIT_OBJ(&tmp, BJXA_ENCODER_MAGIC);
+
+	tmp.channels = fmt->channels;
+	BJXA_PROTO_CHECK(tmp.channels == 1 || tmp.channels == 2);
+
+	tmp.samples = fmt->data_len_pcm / (tmp.channels * sizeof(int16_t));
+	tmp.samples_rate = fmt->samples_rate;
+	BJXA_PROTO_CHECK(tmp.samples > 0);
+	BJXA_PROTO_CHECK(tmp.samples_rate > 0);
+	BJXA_PROTO_CHECK(fmt->data_len_pcm % tmp.samples == 0);
+
+	if (bits == 4)
+		tmp.deflate_cb = bjxa_deflate_4bits;
+	else if (bits == 6)
+		tmp.deflate_cb = bjxa_deflate_6bits;
+	else
+		tmp.deflate_cb = bjxa_deflate_8bits;
+
+	tmp.block_size = bits * 4 + 1;
+	fmt->block_size_xa = tmp.block_size * tmp.channels;
+	fmt->block_size_pcm = BJXA_BLOCK_SAMPLES * tmp.channels *
+	    sizeof(int16_t);
+	fmt->blocks = tmp.samples / BJXA_BLOCK_SAMPLES;
+	tmp.data_len = fmt->blocks * tmp.block_size * tmp.channels;
+	if (tmp.samples % BJXA_BLOCK_SAMPLES != 0) {
+		tmp.data_len += tmp.block_size * tmp.channels;
+		fmt->blocks++;
+	}
+
+	memcpy(tmp.fmt, fmt, sizeof *fmt);
+	memcpy(enc, &tmp, sizeof tmp);
+	return (0);
 }
 
 /* WAVE file format */

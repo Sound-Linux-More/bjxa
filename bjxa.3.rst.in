@@ -91,6 +91,9 @@ SYNOPSIS
 |
 | **bjxa_encoder_t * bjxa_encoder(void);**
 | **int bjxa_free_encoder(bjxa_encoder_t \*\***\ *encp*\ **);**
+|
+| **int bjxa_encode_format(bjxa_encoder_t \***\ *enc*\ **,** \
+      **bjxa_format_t \***\ *fmt*\ **, uint8_t** *bits*\ **);**
 
 DESCRIPTION
 ===========
@@ -123,6 +126,12 @@ considered a single block because of the interleaving. The last PCM block may
 be truncated if the number of remaining samples is less than the contents of a
 full XA block. The field *data_len_pcm* can be used to keep track of how many
 bytes were decoded over iterations.
+
+**bjxa_encode_format()** puts an encoder in a ready state, initialized from a
+**bjxa_format_t** structure and a number of *bits* per XA samples. The *fmt*
+argument must have the *data_len_pcm*, *samples_rate*, *sample_bits* and
+*channels* set. Upon returning successfully the *blocks*, *block_size_pcm* and
+*block_size_xa* fields are set to the appropriate values.
 
 A codec is not MT-Safe. However **bjxa_decoder()** and **bjxa_encoder()**
 functions are MT-Safe but any function taking a codec argument is not. A
@@ -162,17 +171,21 @@ ERRORS
 
 	*decp* is a null pointer or a pointer to a null decoder.
 
-	*dec* or *src* or *dst* or *file* or *fmt* is null.
-
 	*encp* is a null pointer or a pointer to a null encoder.
+
+	*dec* or *enc* or *src* or *dst* or *file* or *fmt* is null.
 
 **EINVAL**
 
 	*decp* is not a pointer to a valid decoder.
 
+	*encp* is not a pointer to a valid encoder.
+
 	*dec* is not a valid decoder, or a decoder not in a ready state.
 
-	*encp* is not a pointer to a valid encoder.
+	*enc* is not a valid encoder, or an encoder not in a ready state.
+
+	*bits* is neither *4*, *6* nor *8*.
 
 **EIO**
 
@@ -213,6 +226,8 @@ ERRORS
 	**bjxa_decode()** got an invalid XA block.
 
 	**bjxa_decode()** already decoded the complete XA stream.
+
+	**bjxa_encode_format()** got an invalid *fmt* argument.
 
 EXAMPLE
 =======

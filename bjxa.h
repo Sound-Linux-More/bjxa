@@ -52,3 +52,5 @@ int bjxa_fwrite_pcm(const int16_t *, size_t, FILE *);
 
 bjxa_encoder_t * bjxa_encoder(void);
 int bjxa_free_encoder(bjxa_encoder_t **);
+
+int bjxa_encode_format(bjxa_encoder_t *, bjxa_format_t *, uint8_t);
