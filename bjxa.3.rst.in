@@ -205,11 +205,11 @@ ERRORS
 	**bjxa_decode()** got a *src_len* lower than *block_size_xa*, so the
 	memory buffer *src* can't hold a complete XA block.
 
-        **bjxa_dump_pcm()** got a *len* of zero or not aligning to the size of
-        a complete sample.
+	**bjxa_dump_pcm()** got a *len* of zero or not aligning to the size of
+	a complete sample.
 
-        **bjxa_fwrite_pcm()** got a *len* of zero or not aligning to the size of
-        a complete sample.
+	**bjxa_fwrite_pcm()** got a *len* of zero or not aligning to the size of
+	a complete sample.
 
 **ENOMEM**
 
