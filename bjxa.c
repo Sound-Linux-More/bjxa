@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2018-2019  Dridi Boukelmoune
+ * Copyright (C) 2018-2020  Dridi Boukelmoune
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,11 @@ usage(FILE* file)
 	    "\n"
 	    "  decode [<xa file> [<wav file>]]\n"
 	    "    Read an XA file and convert it into a WAV file.\n"
+	    "\n"
+	    "  encode [--bits <4|6|8>] [wav file> [<xa file>]]\n"
+	    "    Read a WAV file and convert it into an XA file.\n"
+	    "    The default number of bits per sample, when left\n"
+	    "    unspecified is 6.\n"
 	    "\n",
 	    progname);
 }
@@ -86,6 +91,8 @@ int
 main(int argc, char * const *argv)
 {
 
+	int bits = -1;
+
 	progname = *argv;
 	argc--;
 	argv++;
@@ -104,6 +111,32 @@ main(int argc, char * const *argv)
 			cmd_fail("Too many arguments");
 		if (open_files(argc, argv) < 0 || decode(stdin, stdout) < 0)
 			return (EXIT_FAILURE);
+	}
+	else if (!strcmp("encode", *argv)) {
+		argc--;
+		argv++;
+		if (argc > 0 && !strcmp("--bits", *argv)) {
+			argc--;
+			argv++;
+			if (argc == 0)
+				cmd_fail("Missing number of bits per sample");
+			if (strlen(*argv) == 1)
+				bits = **argv - '0';
+			if (bits != 4 && bits != 6 && bits != 8)
+				cmd_fail("Invalid number of bits per sample");
+			argc--;
+			argv++;
+		}
+		else {
+			bits = 6;
+		}
+		assert(bits == 4 || bits == 6 || bits == 8);
+		if (argc > 2)
+			cmd_fail("Too many arguments");
+		if (open_files(argc, argv) < 0)
+			return (EXIT_FAILURE);
+		fprintf(stderr, "bjxa: Encoding not implemented\n");
+		return (EXIT_FAILURE);
 	}
 	else {
 		cmd_fail("Unknown action");

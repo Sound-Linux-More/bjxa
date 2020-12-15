@@ -1,4 +1,4 @@
-.. Copyright (C) 2018  Dridi Boukelmoune
+.. Copyright (C) 2018-2020  Dridi Boukelmoune
 ..
 .. This program is free software: you can redistribute it and/or modify
 .. it under the terms of the GNU General Public License as published by
@@ -39,17 +39,22 @@ SYNOPSIS
 
 | **bjxa** help
 | **bjxa** decode [*xa-file* [*wav-file*]]
+| **bjxa** encode [--bits <*4|6|8*>] [*wav-file* [*xa-file*]]
 
 DESCRIPTION
 ===========
 
-Decode one XA file and convert it into a WAV file.
+Convert files between BandJAM XA audio and WAV audio with 16bit PCM samples.
 
 With no *xa-file*, or when *xa-file* is **-**, the XA file is read from the
 standard input.
 
 With no *wav-file*, or when *wav-file* is **-**, the WAV file is written to
 the standard output.
+
+For encoding, the **--bits** specifies the number of bits per XA samples and
+the default is 6 when omitted. XA audio can have either 4, 6 or 8 bits per
+sample. Encoding is currently not available.
 
 EXAMPLE
 =======
