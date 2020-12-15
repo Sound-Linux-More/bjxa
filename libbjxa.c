@@ -187,7 +187,7 @@ mputs(uint8_t **buf, const char *str)
 #define BJXA_BLOCK_STEREO	64
 
 typedef uint8_t	bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
-typedef void	bjxa_deflate_f(bjxa_encoder_t *, uint8_t *, const int16_t *);
+typedef void	bjxa_deflate_f(uint8_t *, const int16_t *);
 
 typedef struct {
 	int16_t			prev[2];
@@ -337,38 +337,28 @@ bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 /* deflate XA blocks */
 
 static void
-bjxa_deflate_4bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+bjxa_deflate_4bits(uint8_t *dst, const int16_t *src)
 {
-	unsigned n, chan;
-
-	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
-	assert(enc->channels == 1 || enc->channels == 2);
-
-	chan = enc->channels;
+	unsigned n;
 
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 2) {
-		*dst = ((uint16_t)*src >> 12) << 4; src += chan;
-		*dst |= (uint16_t)*src >> 12;       src += chan;
+		*dst = ((uint16_t)*src >> 8) & 0xf0; src++;
+		*dst |= (uint16_t)*src >> 12;        src++;
 		dst++;
 	}
 }
 
 static void
-bjxa_deflate_6bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+bjxa_deflate_6bits(uint8_t *dst, const int16_t *src)
 {
-	unsigned n, chan;
+	unsigned n;
 	uint32_t samples;
 
-	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
-	assert(enc->channels == 1 || enc->channels == 2);
-
-	chan = enc->channels;
-
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 4) {
-		samples  = (uint32_t)((uint16_t)*src >> 10) << 18; src += chan;
-		samples |= (uint32_t)((uint16_t)*src >> 10) << 12; src += chan;
-		samples |= (uint32_t)((uint16_t)*src >> 10) << 6;  src += chan;
-		samples |= (uint32_t)((uint16_t)*src >> 10);       src += chan;
+		samples  = (uint32_t)((uint16_t)*src >> 10) << 18; src++;
+		samples |= (uint32_t)((uint16_t)*src >> 10) << 12; src++;
+		samples |= (uint32_t)((uint16_t)*src >> 10) << 6;  src++;
+		samples |= (uint32_t)((uint16_t)*src >> 10);       src++;
 
 		assert(samples >> 24 == 0);
 		dst[0] = samples >> 16;
@@ -379,19 +369,14 @@ bjxa_deflate_6bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
 }
 
 static void
-bjxa_deflate_8bits(bjxa_encoder_t *enc, uint8_t *dst, const int16_t *src)
+bjxa_deflate_8bits(uint8_t *dst, const int16_t *src)
 {
-	unsigned n, chan;
-
-	assert(VALID_OBJ(enc, BJXA_ENCODER_MAGIC));
-	assert(enc->channels == 1 || enc->channels == 2);
-
-	chan = enc->channels;
+	unsigned n;
 
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n--) {
 		*dst = ((uint16_t)*src) >> 8;
 		dst++;
-		src += chan;
+		src++;
 	}
 }
 
@@ -665,6 +650,73 @@ bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 	memcpy(tmp.fmt, fmt, sizeof *fmt);
 	memcpy(enc, &tmp, sizeof tmp);
 	return (0);
+}
+
+int
+bjxa_encode(bjxa_encoder_t *enc, void *dst, size_t dst_len, const void *src,
+    size_t src_len)
+{
+	bjxa_format_t *fmt;
+	const int16_t *src_ptr, enc_buf[BJXA_BLOCK_SAMPLES];
+	uint8_t *dst_ptr;
+	uint8_t profile, pcm_block;
+	int blocks = 0;
+
+	CHECK_OBJ(enc, BJXA_ENCODER_MAGIC);
+	CHECK_PTR(dst);
+	CHECK_PTR(src);
+	fmt = enc->fmt;
+	BJXA_COND_CHECK(fmt->sample_bits == 16, EINVAL);
+	BJXA_PROTO_CHECK(fmt->blocks > 0);
+
+	BJXA_BUFFER_CHECK(dst_len >= fmt->block_size_xa);
+	BJXA_BUFFER_CHECK(src_len >= fmt->block_size_pcm);
+
+	pcm_block = fmt->block_size_pcm;
+	if (pcm_block > fmt->data_len_pcm)
+		pcm_block = (uint8_t)fmt->data_len_pcm;
+
+	dst_ptr = dst;
+	src_ptr = src;
+
+	while (fmt->blocks > 0 && dst_len >= fmt->block_size_xa &&
+	    src_len >= pcm_block) {
+
+		profile = 0; /* XXX: temporary */
+
+		assert(pcm_block > 0);
+#if 0
+		bjxa_encode_inflated(enc, enc_buf, src_ptr, &profile,
+		    0, pcm_block);
+#endif
+		*dst_ptr = profile;
+		enc->deflate_cb(dst_ptr + 1, enc_buf);
+
+		dst_ptr += enc->block_size;
+		dst_len -= enc->block_size;
+
+		if (enc->channels == 2) {
+#if 0
+			bjxa_encode_inflated(enc, enc_buf, src_ptr, &profile,
+			    1, pcm_block);
+#endif
+			*dst_ptr = profile;
+			enc->deflate_cb(dst_ptr + 1, enc_buf);
+			dst_ptr += enc->block_size;
+			dst_len -= enc->block_size;
+		}
+
+		src_ptr += pcm_block / sizeof *src_ptr;
+		src_len -= pcm_block;
+		blocks++;
+
+		fmt->data_len_pcm -= pcm_block;
+		fmt->blocks--;
+		if (pcm_block > fmt->data_len_pcm)
+			pcm_block = (uint8_t)fmt->data_len_pcm;
+	}
+
+	return (blocks);
 }
 
 /* WAVE file format */

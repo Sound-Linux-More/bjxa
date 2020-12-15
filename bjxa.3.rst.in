@@ -94,6 +94,9 @@ SYNOPSIS
 |
 | **int bjxa_encode_format(bjxa_encoder_t \***\ *enc*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **, uint8_t** *bits*\ **);**
+| **int bjxa_encode(bjxa_encoder_t \***\ *enc*\ **,** \
+      **void \***\ *dst*\ **, size_t** *dst_len*\ **,** \
+      **const void \***\ *src*\ **, size_t** *src_len*\ **);**
 
 DESCRIPTION
 ===========
@@ -132,6 +135,10 @@ bytes were decoded over iterations.
 argument must have the *data_len_pcm*, *samples_rate*, *sample_bits* and
 *channels* set. Upon returning successfully the *blocks*, *block_size_pcm* and
 *block_size_xa* fields are set to the appropriate values.
+
+**bjxa_encode()** encodes XA blocks written to *dst* from PCM samples read from
+*src*. It follows the same rules as **bjxa_decode()** but does the opposite
+work.
 
 A codec is not MT-Safe. However **bjxa_decoder()** and **bjxa_encoder()**
 functions are MT-Safe but any function taking a codec argument is not. A
@@ -204,6 +211,12 @@ ERRORS
 
 	**bjxa_decode()** got a *src_len* lower than *block_size_xa*, so the
 	memory buffer *src* can't hold a complete XA block.
+
+	**bjxa_encode()** got a *dst_len* lower than *block_size_xa*, so the
+	memory buffer *dst* can't hold a complete XA block.
+
+	**bjxa_encode()** got a *src_len* lower than *block_size_pcm*, so the
+	memory buffer *src* can't hold a complete PCM block.
 
 	**bjxa_dump_pcm()** got a *len* of zero or not aligning to the size of
 	a complete sample.
