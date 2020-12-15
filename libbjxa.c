@@ -544,10 +544,7 @@ bjxa_decode_format(bjxa_decoder_t *dec, bjxa_format_t *fmt)
 
 	CHECK_OBJ(dec, BJXA_DECODER_MAGIC);
 	CHECK_PTR(fmt);
-	if (dec->block_size == 0) {
-		errno = EINVAL;
-		return (-1);
-	}
+	BJXA_COND_CHECK(dec->block_size != 0, EINVAL);
 
 	fmt->data_len_pcm = dec->samples * dec->channels * sizeof(int16_t);
 	fmt->samples_rate = dec->samples_rate;
