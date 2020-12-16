@@ -150,10 +150,6 @@ argument must have the *data_len_pcm*, *samples_rate*, *sample_bits* and
 *src*. It follows the same rules as **bjxa_decode()** but does the opposite
 work.
 
-A codec is not MT-Safe. However **bjxa_decoder()** and **bjxa_encoder()**
-functions are MT-Safe but any function taking a codec argument is not. A
-codec should be manipulated by a single thread at a time.
-
 **bjxa_dump_pcm()** and **bjxa_fwrite_pcm()** write PCM samples respectively
 to memory or to a file, regardless of the host byte order. *len* is always
 the buffer length for *src* and *dst*, not the number of samples.
@@ -253,6 +249,13 @@ ERRORS
 	**bjxa_decode()** already decoded the complete XA stream.
 
 	**bjxa_encode_format()** got an invalid *fmt* argument.
+
+ATTRIBUTES
+==========
+
+A codec is not MT-Safe. However **bjxa_decoder()** and **bjxa_encoder()**
+functions are MT-Safe but any function taking a codec argument is not. A
+codec should be manipulated by a single thread at a time.
 
 EXAMPLE
 =======
