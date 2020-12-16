@@ -97,6 +97,11 @@ SYNOPSIS
 | **int bjxa_encode(bjxa_encoder_t \***\ *enc*\ **,** \
       **void \***\ *dst*\ **, size_t** *dst_len*\ **,** \
       **const void \***\ *src*\ **, size_t** *src_len*\ **);**
+|
+| **ssize_t bjxa_dump_header(bjxa_encoder_t \***\ *enc*\ **,** \
+      **void \***\ *dst*\ **, size_t** *len*\ **);**
+| **ssize_t bjxa_fwrite_header(bjxa_encoder_t \***\ *enc*\ **,** \
+      **FILE \***\ *file*\ **);**
 
 DESCRIPTION
 ===========
@@ -112,6 +117,11 @@ file respectively from memory or from a file. On success, the decoder is ready
 to convert samples. A used decoder can parse a new XA header at any time, even
 in the middle of a conversion. The state of the decoder is updated atomically
 only on success.
+
+**bjxa_dump_header()** and **bjxa_fwrite_header()** write an XA file header
+respectively to memory or to a file. The encoder must be in a read state. Such
+a header followed by the data produced by **bjxa_encode()** produces a valid
+XA file.
 
 **bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** write a RIFF
 header of a WAVE file respectively to memory or to a file. Such a header
@@ -198,10 +208,12 @@ ERRORS
 
 	**bjxa_fread_header()** could not read a complete XA header.
 
+	**bjxa_fwrite_header()** could not write a complete XA header.
+
 **ENOBUFS**
 
-	**bjxa_parse_header()** got a *len* lower than 32, so the memory
-	buffer can't hold a complete XA header.
+	**bjxa_parse_header()** or **bjxa_dump_header()** got a *len* lower
+        than 32, so the memory buffer can't hold a complete XA header.
 
 	**bjxa_dump_riff_header()** got a *len* too low, so the memory
 	buffer can't hold a complete RIFF header.

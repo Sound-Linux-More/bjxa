@@ -213,6 +213,7 @@ struct bjxa_encoder {
 	uint32_t		samples;
 	uint16_t		samples_rate;
 	uint8_t			block_size;
+	uint8_t			bits;
 	uint8_t			channels;
 	bjxa_channel_t		channel_state[2];
 	bjxa_deflate_f		*deflate_cb;
@@ -466,6 +467,51 @@ bjxa_fread_header(bjxa_decoder_t *dec, FILE *file)
 	return (ret);
 }
 
+ssize_t
+bjxa_dump_header(bjxa_encoder_t *enc, void *dst, size_t len)
+{
+	uint8_t *hdr;
+
+	CHECK_OBJ(enc, BJXA_ENCODER_MAGIC);
+	CHECK_PTR(dst);
+	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE_XA);
+	BJXA_COND_CHECK(enc->data_len > 0, EINVAL);
+
+	hdr = dst;
+	mputs(&hdr, "KWD1");
+	mwrite_le(&hdr, enc->data_len, 32);
+	mwrite_le(&hdr, enc->samples, 32);
+	mwrite_le(&hdr, enc->samples_rate, 16);
+	mwrite_le(&hdr, enc->bits, 8);
+	mwrite_le(&hdr, enc->channels, 8);
+	mwrite_le(&hdr, 0, 32); /* loop */
+	mwrite_le(&hdr, 0, 16); /* prev */
+	mwrite_le(&hdr, 0, 16); /* prev */
+	mwrite_le(&hdr, 0, 16); /* prev */
+	mwrite_le(&hdr, 0, 16); /* prev */
+	mwrite_le(&hdr, 0, 32); /* pad */
+
+	return (BJXA_HEADER_SIZE_XA);
+}
+
+ssize_t
+bjxa_fwrite_header(bjxa_encoder_t *enc, FILE *file)
+{
+	uint8_t buf[BJXA_HEADER_SIZE_XA];
+
+	CHECK_OBJ(enc, BJXA_ENCODER_MAGIC);
+	CHECK_PTR(file);
+	if (bjxa_dump_header(enc, buf, sizeof buf) < 0) {
+		assert(errno != ENOBUFS);
+		return (-1);
+	}
+
+	if (fwrite(buf, sizeof buf, 1, file) != 1)
+		return (-1);
+
+	return (BJXA_HEADER_SIZE_XA);
+}
+
 /* decode XA blocks */
 
 static const int16_t gain_factor[][2] = {
@@ -647,7 +693,7 @@ bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 	BJXA_COND_CHECK(fmt->blocks == 0, EINVAL);
 
 	INIT_OBJ(&tmp, BJXA_ENCODER_MAGIC);
-
+	tmp.bits = bits;
 	tmp.channels = fmt->channels;
 	BJXA_PROTO_CHECK(tmp.channels == 1 || tmp.channels == 2);
 
