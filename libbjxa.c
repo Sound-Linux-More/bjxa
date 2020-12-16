@@ -607,6 +607,34 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 
 /* encode XA blocks */
 
+static void
+bjxa_encode_inflated(bjxa_encoder_t *enc, int16_t *dst, const int16_t *src,
+    uint8_t *profile, unsigned chan, unsigned pcm_block)
+{
+	unsigned n, samples, step;
+
+	assert(chan == 0 || chan == 1);
+	assert(pcm_block > 0);
+
+	step = enc->channels;
+	samples = pcm_block / (step * sizeof *src);
+	assert(pcm_block % samples == 0);
+	assert(samples <= BJXA_BLOCK_SAMPLES);
+
+	*profile = 0;
+	for (n = 0; n < samples; n++) {
+		*dst = *src;
+		src += step;
+		dst++;
+	}
+
+	while (samples < BJXA_BLOCK_SAMPLES) {
+		*dst = 0;
+		dst++;
+		samples++;
+	}
+}
+
 int
 bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 {
@@ -657,8 +685,9 @@ bjxa_encode(bjxa_encoder_t *enc, void *dst, size_t dst_len, const void *src,
     size_t src_len)
 {
 	bjxa_format_t *fmt;
-	const int16_t *src_ptr, enc_buf[BJXA_BLOCK_SAMPLES];
+	const int16_t *src_ptr;
 	uint8_t *dst_ptr;
+	int16_t enc_buf[BJXA_BLOCK_SAMPLES];
 	uint8_t profile, pcm_block;
 	int blocks = 0;
 
@@ -682,13 +711,9 @@ bjxa_encode(bjxa_encoder_t *enc, void *dst, size_t dst_len, const void *src,
 	while (fmt->blocks > 0 && dst_len >= fmt->block_size_xa &&
 	    src_len >= pcm_block) {
 
-		profile = 0; /* XXX: temporary */
-
 		assert(pcm_block > 0);
-#if 0
 		bjxa_encode_inflated(enc, enc_buf, src_ptr, &profile,
 		    0, pcm_block);
-#endif
 		*dst_ptr = profile;
 		enc->deflate_cb(dst_ptr + 1, enc_buf);
 
@@ -696,10 +721,8 @@ bjxa_encode(bjxa_encoder_t *enc, void *dst, size_t dst_len, const void *src,
 		dst_len -= enc->block_size;
 
 		if (enc->channels == 2) {
-#if 0
-			bjxa_encode_inflated(enc, enc_buf, src_ptr, &profile,
-			    1, pcm_block);
-#endif
+			bjxa_encode_inflated(enc, enc_buf, src_ptr + 1,
+			    &profile, 1, pcm_block);
 			*dst_ptr = profile;
 			enc->deflate_cb(dst_ptr + 1, enc_buf);
 			dst_ptr += enc->block_size;
