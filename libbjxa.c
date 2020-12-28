@@ -682,7 +682,7 @@ bjxa_encode_inflated(bjxa_encoder_t *enc, int16_t *dst, const int16_t *src,
 }
 
 int
-bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
+bjxa_encode_init(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 {
 	bjxa_encoder_t tmp;
 
@@ -690,7 +690,6 @@ bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 	CHECK_PTR(fmt);
 	BJXA_COND_CHECK(fmt->sample_bits == 16, EINVAL);
 	BJXA_COND_CHECK(bits == 4 || bits == 6 || bits == 8, EINVAL);
-	BJXA_COND_CHECK(fmt->blocks == 0, EINVAL);
 
 	INIT_OBJ(&tmp, BJXA_ENCODER_MAGIC);
 	tmp.bits = bits;
@@ -723,6 +722,28 @@ bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt, uint8_t bits)
 
 	memcpy(tmp.fmt, fmt, sizeof *fmt);
 	memcpy(enc, &tmp, sizeof tmp);
+	return (0);
+}
+
+int
+bjxa_encode_format(bjxa_encoder_t *enc, bjxa_format_t *fmt)
+{
+
+	CHECK_OBJ(enc, BJXA_ENCODER_MAGIC);
+	CHECK_PTR(fmt);
+	BJXA_COND_CHECK(enc->block_size != 0, EINVAL);
+
+	fmt->data_len_pcm = enc->samples * enc->channels * sizeof(int16_t);
+	fmt->samples_rate = enc->samples_rate;
+	fmt->sample_bits = enc->bits;
+	fmt->channels = enc->channels;
+	fmt->block_size_xa = enc->block_size * enc->channels;
+	fmt->block_size_pcm = BJXA_BLOCK_SAMPLES * enc->channels *
+	    sizeof(int16_t);
+	fmt->blocks = enc->data_len / fmt->block_size_xa;
+
+	assert(fmt->blocks * fmt->block_size_xa == enc->data_len);
+
 	return (0);
 }
 

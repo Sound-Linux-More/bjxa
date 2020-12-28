@@ -92,8 +92,10 @@ SYNOPSIS
 | **bjxa_encoder_t * bjxa_encoder(void);**
 | **int bjxa_free_encoder(bjxa_encoder_t \*\***\ *encp*\ **);**
 |
-| **int bjxa_encode_format(bjxa_encoder_t \***\ *enc*\ **,** \
+| **int bjxa_encode_init(bjxa_encoder_t \***\ *enc*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **, uint8_t** *bits*\ **);**
+| **int bjxa_encode_format(bjxa_encoder_t \***\ *enc*\ **,** \
+      **bjxa_format_t \***\ *fmt*\ **);**
 | **int bjxa_encode(bjxa_encoder_t \***\ *enc*\ **,** \
       **void \***\ *dst*\ **, size_t** *dst_len*\ **,** \
       **const void \***\ *src*\ **, size_t** *src_len*\ **);**
@@ -130,6 +132,7 @@ followed by the data produced by **bjxa_decode()** produces a valid WAV file.
 **bjxa_decode_format()** takes a decoder in a ready state and fills a
 **bjxa_format_t** structure with information about the XA file. This
 information can then be used to drive the decoding using **bjxa_decode()**.
+On success the *sample_bits* field contains the number of bits per PCM sample.
 
 **bjxa_decode()** decodes XA blocks read from *src* to PCM samples written to
 *dst*. Stereo PCM samples are interleaved and both channels interpreted as a
@@ -140,11 +143,18 @@ be truncated if the number of remaining samples is less than the contents of a
 full XA block. The field *data_len_pcm* can be used to keep track of how many
 bytes were decoded over iterations.
 
-**bjxa_encode_format()** puts an encoder in a ready state, initialized from a
+**bjxa_encode_init()** puts an encoder in a ready state, initialized from a
 **bjxa_format_t** structure and a number of *bits* per XA samples. The *fmt*
 argument must have the *data_len_pcm*, *samples_rate*, *sample_bits* and
-*channels* set. Upon returning successfully the *blocks*, *block_size_pcm* and
-*block_size_xa* fields are set to the appropriate values.
+*channels* set. On success the *blocks*, *block_size_pcm* and *block_size_xa*
+fields are set to the appropriate values. A used encoder can be reinitialized
+at any time, even in the middle of a conversion. The *sample_bits* field
+represents the number of bits per PCM sample and must be 16.
+
+**bjxa_encode_format()** takes an encoder in a ready state and fills a
+**bjxa_format_t** structure with information about the XA file. This
+information can then be used to drive the encoding using **bjxa_encode()**.
+On success the *sample_bits* field contains the number of bits per XA sample.
 
 **bjxa_encode()** encodes XA blocks written to *dst* from PCM samples read from
 *src*. It follows the same rules as **bjxa_decode()** but does the opposite
@@ -248,7 +258,7 @@ ERRORS
 
 	**bjxa_decode()** already decoded the complete XA stream.
 
-	**bjxa_encode_format()** got an invalid *fmt* argument.
+	**bjxa_encode_init()** got an invalid *fmt* argument.
 
 ATTRIBUTES
 ==========
