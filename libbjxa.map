@@ -32,8 +32,15 @@ LIBBJXA_0.1 {
 
 LIBBJXA_0.5 {
   global:
+    bjxa_dump_header;
+    bjxa_encode;
+    bjxa_encode_format;
+    bjxa_encode_init;
     bjxa_encoder;
+    bjxa_fread_riff_header;
     bjxa_free_encoder;
+    bjxa_fwrite_header;
+    bjxa_parse_riff_header;
 
   local:
     *;

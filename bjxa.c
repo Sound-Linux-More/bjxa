@@ -133,10 +133,9 @@ main(int argc, char * const *argv)
 		assert(bits == 4 || bits == 6 || bits == 8);
 		if (argc > 2)
 			cmd_fail("Too many arguments");
-		if (open_files(argc, argv) < 0)
+		if (open_files(argc, argv) < 0 ||
+		    encode(stdin, stdout, bits) < 0)
 			return (EXIT_FAILURE);
-		fprintf(stderr, "bjxa: Encoding not implemented\n");
-		return (EXIT_FAILURE);
 	}
 	else {
 		cmd_fail("Unknown action");

@@ -20,3 +20,4 @@
 #endif
 
 int decode(FILE *, FILE *);
+int encode(FILE *, FILE *, unsigned);

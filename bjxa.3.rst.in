@@ -29,11 +29,13 @@ PROLOG
 
 The goal of **libbjxa** is to provide a portable and clean interface to
 interact with BandJAM XA audio files. It provides a decoder that can convert
-any XA file to a PCM stream of 16 bits samples.
+any XA file to a PCM stream of 16 bits samples, and encoder for the opposite
+conversion. It can work with simple WAV files containing mono or stereo 16
+bits PCM samples.
 
 It is a replacement for the **xadec.dll** library that was shipped with
 BandJAM with a license allowing to use it for free of charge projects but its
-source code is unavailable and the Windows library only exists for 32 bit x86
+source code is unavailable and the Windows library only exists for 32 bits x86
 systems.
 
 SYNOPSIS
@@ -127,7 +129,7 @@ in the middle of a conversion. The state of the decoder is updated atomically
 only on success.
 
 **bjxa_parse_riff_header()** and **bjxa_fread_riff_header()** parse the header
-of an WAVE file respectively from memory or from a file. Only 16 bits mono or
+of an WAV file respectively from memory or from a file. Only 16 bits mono or
 stereo PCM formats are supported. On success, the format is populated and
 ready to be consumed by **bjxa_encode_init()**. Only ``"RIFF"`` containers
 starting with ``"WAVEfmt "`` and ``"data"`` segments are supported. Anything
@@ -139,7 +141,7 @@ a header followed by the data produced by **bjxa_encode()** produces a valid
 XA file.
 
 **bjxa_dump_riff_header()** and **bjxa_fwrite_riff_header()** write a RIFF
-header of a WAVE file respectively to memory or to a file. Such a header
+header of a WAV file respectively to memory or to a file. Such a header
 followed by the data produced by **bjxa_decode()** produces a valid WAV file.
 
 **bjxa_decode_format()** takes a decoder in a ready state and fills a
@@ -288,6 +290,14 @@ using a decoder, either incrementally or in a single pass:
 
 .. include:: @builddir@/bjxa_decode.c.txt
     :literal:
+
+The following code demonstrates the conversion of one WAV file to an XA file
+using an encoder, either incrementally or in a single pass:
+
+.. include:: @builddir@/bjxa_encode.c.txt
+    :literal:
+
+Both examples come from the **bjxa**\(1) actual source code.
 
 BUGS
 ====

@@ -25,7 +25,7 @@ bin_PROGRAMS = bjxa
 include_HEADERS = bjxa.h
 noinst_HEADERS = bjxa_priv.h
 
-libbjxa_la_LDFLAGS = -version-info 1:0:1
+libbjxa_la_LDFLAGS = -version-info 2:0:2
 libbjxa_la_DEPENDENCIES = $(include_HEADERS) $(noinst_HEADERS)
 
 if WITH_LD_VERSION_SCRIPT
@@ -33,7 +33,7 @@ libbjxa_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libbjxa.map
 libbjxa_la_DEPENDENCIES += libbjxa.map
 endif
 
-bjxa_SOURCES = bjxa.c bjxa_decode.c
+bjxa_SOURCES = bjxa.c bjxa_decode.c bjxa_encode.c
 bjxa_LDADD = libbjxa.la
 
 # Packaging
@@ -49,14 +49,21 @@ bjxa_3_links = \
 	bjxa_decode_format.3 \
 	bjxa_decoder.3 \
 	bjxa_dump_pcm.3 \
+	bjxa_dump_header.3 \
 	bjxa_dump_riff_header.3 \
+	bjxa_encode.3 \
+	bjxa_encode_format.3 \
+	bjxa_encode_init.3 \
 	bjxa_encoder.3 \
 	bjxa_fread_header.3 \
+	bjxa_fread_riff_header.3 \
 	bjxa_free_decoder.3 \
 	bjxa_free_encoder.3 \
+	bjxa_fwrite_header.3 \
 	bjxa_fwrite_pcm.3 \
 	bjxa_fwrite_riff_header.3 \
-	bjxa_parse_header.3
+	bjxa_parse_header.3 \
+	bjxa_parse_riff_header.3
 
 dist_doc_DATA = README.rst
 dist_man_MANS = bjxa.1 bjxa.3 bjxa.5 $(bjxa_3_links)
@@ -77,7 +84,7 @@ DOCUMENTATION_SUFFIXES = \
 $(bjxa_3_links):
 	$(AM_V_GEN) printf ".so man3/%s\n" bjxa.3 >$@
 
-bjxa.3: bjxa_decode.c.txt
+bjxa.3: bjxa_decode.c.txt bjxa_encode.c.txt
 endif
 
 # C#

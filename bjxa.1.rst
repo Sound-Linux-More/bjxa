@@ -31,7 +31,7 @@ with BandJAM XA audio files.
 
 It is a replacement for the **xa.exe** program that was shipped with BandJAM
 with a license allowing to use it for free of charge projects but its source
-code is unavailable and the Windows executable only exists for 32 bit x86
+code is unavailable and the Windows executable only exists for 32 bits x86
 systems.
 
 SYNOPSIS
@@ -46,15 +46,13 @@ DESCRIPTION
 
 Convert files between BandJAM XA audio and WAV audio with 16bit PCM samples.
 
-With no *xa-file*, or when *xa-file* is **-**, the XA file is read from the
-standard input.
-
-With no *wav-file*, or when *wav-file* is **-**, the WAV file is written to
-the standard output.
+When either *xa-file* or *wav-file* is omitted or **-**, the XA or WAV file
+is either read from the standard input or written to the standard output
+depending on the **decode** or **encode** command.
 
 For encoding, the **--bits** specifies the number of bits per XA samples and
 the default is 6 when omitted. XA audio can have either 4, 6 or 8 bits per
-sample. Encoding is currently not available.
+sample. Encoding is partially implemented.
 
 EXAMPLE
 =======
