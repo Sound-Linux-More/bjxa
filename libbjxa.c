@@ -165,6 +165,28 @@ mwrite_le(uint8_t **buf, uint32_t val, unsigned bits)
 	}
 }
 
+/* magic strings */
+
+static int
+mgets(const uint8_t **buf, const char *str)
+{
+	unsigned len;
+
+	assert(buf != NULL);
+	assert(*buf != NULL);
+	assert(str != NULL);
+
+	len = strlen(str);
+	assert(len > 0);
+	if (memcmp(*buf, str, len)) {
+		errno = EPROTO;
+		return (-1);
+	}
+
+	*buf += len;
+	return (0);
+}
+
 static void
 mputs(uint8_t **buf, const char *str)
 {
@@ -182,7 +204,6 @@ mputs(uint8_t **buf, const char *str)
 
 /* data structures */
 
-#define BJXA_HEADER_MAGIC	0x3144574b
 #define BJXA_BLOCK_SAMPLES	32
 #define BJXA_BLOCK_STEREO	64
 
@@ -387,7 +408,7 @@ ssize_t
 bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 {
 	bjxa_decoder_t tmp;
-	uint32_t magic, pad, blocks, max_samples, loop;
+	uint32_t pad, blocks, max_samples, loop;
 	const uint8_t *buf;
 	uint8_t bits;
 
@@ -398,7 +419,7 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 	buf = src;
 
 	INIT_OBJ(&tmp, BJXA_DECODER_MAGIC);
-	magic = mread_le32(&buf);
+	BJXA_TRY(mgets(&buf, "KWD1"));
 	tmp.data_len = mread_le32(&buf);
 	tmp.samples = mread_le32(&buf);
 	tmp.samples_rate = mread_le16(&buf);
@@ -413,7 +434,6 @@ bjxa_parse_header(bjxa_decoder_t *dec, const void *src, size_t len)
 
 	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE_XA);
 
-	BJXA_PROTO_CHECK(magic == BJXA_HEADER_MAGIC);
 	BJXA_PROTO_CHECK(tmp.data_len > 0);
 	BJXA_PROTO_CHECK(tmp.samples > 0);
 	BJXA_PROTO_CHECK(tmp.samples_rate > 0);
