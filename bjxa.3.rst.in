@@ -92,8 +92,14 @@ SYNOPSIS
 | **bjxa_encoder_t * bjxa_encoder(void);**
 | **int bjxa_free_encoder(bjxa_encoder_t \*\***\ *encp*\ **);**
 |
+| **ssize_t bjxa_parse_riff_header(bjxa_format_t \***\ *fmt*\ **,** \
+      **const void \***\ *src*\ **, size_t** *len*\ **);**
+| **ssize_t bjxa_fread_riff_header(bjxa_format_t \***\ *fmt*\ **,** \
+      **FILE \***\ *file*\ **);**
+|
 | **int bjxa_encode_init(bjxa_encoder_t \***\ *enc*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **, uint8_t** *bits*\ **);**
+|
 | **int bjxa_encode_format(bjxa_encoder_t \***\ *enc*\ **,** \
       **bjxa_format_t \***\ *fmt*\ **);**
 | **int bjxa_encode(bjxa_encoder_t \***\ *enc*\ **,** \
@@ -119,6 +125,13 @@ file respectively from memory or from a file. On success, the decoder is ready
 to convert samples. A used decoder can parse a new XA header at any time, even
 in the middle of a conversion. The state of the decoder is updated atomically
 only on success.
+
+**bjxa_parse_riff_header()** and **bjxa_fread_riff_header()** parse the header
+of an WAVE file respectively from memory or from a file. Only 16 bits mono or
+stereo PCM formats are supported. On success, the format is populated and
+ready to be consumed by **bjxa_encode_init()**. Only ``"RIFF"`` containers
+starting with ``"WAVEfmt "`` and ``"data"`` segments are supported. Anything
+past the ``"data"`` segment is ignored.
 
 **bjxa_dump_header()** and **bjxa_fwrite_header()** write an XA file header
 respectively to memory or to a file. The encoder must be in a read state. Such

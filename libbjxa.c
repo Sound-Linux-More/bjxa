@@ -835,6 +835,78 @@ bjxa_encode(bjxa_encoder_t *enc, void *dst, size_t dst_len, const void *src,
 #define WAVE_FORMAT_PCM	1
 
 ssize_t
+bjxa_parse_riff_header(bjxa_format_t *fmt, const void *src, size_t len)
+{
+	bjxa_format_t tmp;
+	uint32_t riff_data, wave_hdr, wave_rate, wave_bytes, wave_data;
+	uint16_t wave_fmt, wave_chan, wave_block, wave_bits;
+	const uint8_t *buf;
+
+	CHECK_PTR(fmt);
+	CHECK_PTR(src);
+	BJXA_BUFFER_CHECK(len >= BJXA_HEADER_SIZE_RIFF);
+
+	buf = src;
+
+	BJXA_TRY(mgets(&buf, "RIFF"));
+	riff_data = mread_le32(&buf);
+	BJXA_TRY(mgets(&buf, "WAVEfmt "));
+	wave_hdr = mread_le32(&buf);
+	wave_fmt = mread_le16(&buf);
+	wave_chan = mread_le16(&buf);
+	wave_rate = mread_le32(&buf);
+	wave_bytes = mread_le32(&buf);
+	wave_block = mread_le16(&buf);
+	wave_bits = mread_le16(&buf);
+	BJXA_TRY(mgets(&buf, "data"));
+	wave_data = mread_le32(&buf);
+
+	assert((uintptr_t)buf - (uintptr_t)src == BJXA_HEADER_SIZE_RIFF);
+
+	BJXA_PROTO_CHECK(riff_data >= BJXA_HEADER_SIZE_RIFF - 8 + wave_data);
+	BJXA_PROTO_CHECK(wave_hdr == WAVE_HEADER_LEN);
+	BJXA_PROTO_CHECK(wave_fmt == WAVE_FORMAT_PCM);
+	BJXA_PROTO_CHECK(wave_chan == 1 || wave_chan == 2);
+	BJXA_PROTO_CHECK(wave_rate > 0 && wave_rate < UINT16_MAX);
+	BJXA_PROTO_CHECK(wave_block == wave_chan * sizeof(uint16_t));
+	BJXA_PROTO_CHECK(wave_bytes == wave_rate * wave_block);
+	BJXA_PROTO_CHECK(wave_data % wave_block == 0);
+	BJXA_PROTO_CHECK(wave_bits == 16);
+
+	memset(&tmp, 0, sizeof tmp);
+	tmp.data_len_pcm = wave_data;
+	tmp.samples_rate = wave_rate;
+	tmp.sample_bits = 16;
+	tmp.channels = wave_chan;
+	(void)memcpy(fmt, &tmp, sizeof tmp);
+
+	return (BJXA_HEADER_SIZE_RIFF);
+}
+
+ssize_t
+bjxa_fread_riff_header(bjxa_format_t *fmt, FILE *file)
+{
+	uint8_t buf[BJXA_HEADER_SIZE_RIFF];
+	ssize_t ret;
+
+	CHECK_PTR(fmt);
+	CHECK_PTR(file);
+
+	if (fread(buf, sizeof buf, 1, file) != 1) {
+		if (feof(file))
+			errno = EIO;
+		return (-1);
+	}
+
+	ret = bjxa_parse_riff_header(fmt, buf, sizeof buf);
+	if (ret < 0) {
+		assert(errno != EINVAL);
+		assert(errno != ENOBUFS);
+	}
+	return (ret);
+}
+
+ssize_t
 bjxa_dump_riff_header(bjxa_decoder_t *dec, void *dst, size_t len)
 {
 	bjxa_format_t fmt;
