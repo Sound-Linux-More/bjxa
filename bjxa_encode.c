@@ -82,7 +82,10 @@ encode_loop(bjxa_encoder_t *enc, FILE *in, FILE *out, unsigned bits)
 	}
 
 	if (ret == 0 && fread(buf_pcm, fmt.data_len_pcm, 1, in) != 1) {
-		perror("fread");
+		if (feof(in))
+			fprintf(stderr, "fread: End of file\n");
+		else
+			perror("fread");
 		ret = -1;
 	}
 
@@ -130,10 +133,10 @@ encode_loop(bjxa_encoder_t *enc, FILE *in, FILE *out, unsigned bits)
 			pcm_block = fmt.data_len_pcm;
 
 		if (fread(buf_pcm, pcm_block, 1, in) != 1) {
-			perror("fread");
 			if (feof(in))
-				perror("feof");
-			fprintf(stderr, "blocks=%u\n", fmt.blocks);
+				fprintf(stderr, "fread: End of file\n");
+			else
+				perror("fread");
 			ret = -1;
 			break;
 		}

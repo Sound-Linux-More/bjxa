@@ -76,7 +76,10 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 	}
 
 	if (ret == 0 && fread(buf_xa, xa_len, 1, in) != 1) {
-		perror("fread");
+		if (feof(in))
+			fprintf(stderr, "fread: End of file\n");
+		else
+			perror("fread");
 		ret = -1;
 	}
 
@@ -118,7 +121,10 @@ decode_loop(bjxa_decoder_t *dec, FILE *in, FILE *out)
 
 	while (fmt.blocks > 0 && ret == 0) {
 		if (fread(buf_xa, fmt.block_size_xa, 1, in) != 1) {
-			perror("fread");
+			if (feof(in))
+				fprintf(stderr, "fread: End of file\n");
+			else
+				perror("fread");
 			ret = -1;
 			break;
 		}
