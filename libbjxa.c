@@ -207,7 +207,7 @@ mputs(uint8_t **buf, const char *str)
 #define BJXA_BLOCK_SAMPLES	32
 #define BJXA_BLOCK_STEREO	64
 
-typedef uint8_t	bjxa_inflate_f(bjxa_decoder_t *, int16_t *, const uint8_t *);
+typedef uint8_t	bjxa_inflate_f(int16_t *, const uint8_t *, unsigned);
 typedef void	bjxa_deflate_f(uint8_t *, const int16_t *);
 
 typedef struct {
@@ -284,21 +284,17 @@ bjxa_free_encoder(bjxa_encoder_t **encp)
 /* inflate XA blocks */
 
 static uint8_t
-bjxa_inflate_4bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+bjxa_inflate_4bits(int16_t *dst, const uint8_t *src, unsigned step)
 {
-	unsigned n, chan;
 	uint8_t profile;
+	unsigned n;
 
-	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
-	assert(dec->channels == 1 || dec->channels == 2);
-
-	chan = dec->channels;
 	profile = *src;
 	src++;
 
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n -= 2) {
-		*dst = (int16_t)((src[0] & 0xf0) << 8);  dst += chan;
-		*dst = (int16_t)((src[0] & 0x0f) << 12); dst += chan;
+		*dst = (int16_t)((src[0] & 0xf0) << 8);  dst += step;
+		*dst = (int16_t)((src[0] & 0x0f) << 12); dst += step;
 		src++;
 	}
 
@@ -306,16 +302,12 @@ bjxa_inflate_4bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 }
 
 static uint8_t
-bjxa_inflate_6bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+bjxa_inflate_6bits(int16_t *dst, const uint8_t *src, unsigned step)
 {
-	unsigned n, chan;
 	uint32_t samples;
 	uint8_t profile;
+	unsigned n;
 
-	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
-	assert(dec->channels == 1 || dec->channels == 2);
-
-	chan = dec->channels;
 	profile = *src;
 	src++;
 
@@ -323,10 +315,10 @@ bjxa_inflate_6bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 		samples = (uint32_t)(src[0] << 16) | (uint32_t)(src[1] << 8) |
 		    src[2];
 
-		*dst = (int16_t)((samples & 0x00fc0000) >> 8);  dst += chan;
-		*dst = (int16_t)((samples & 0x0003f000) >> 2);  dst += chan;
-		*dst = (int16_t)((samples & 0x00000fc0) << 4);  dst += chan;
-		*dst = (int16_t)((samples & 0x0000003f) << 10); dst += chan;
+		*dst = (int16_t)((samples & 0x00fc0000) >> 8);  dst += step;
+		*dst = (int16_t)((samples & 0x0003f000) >> 2);  dst += step;
+		*dst = (int16_t)((samples & 0x00000fc0) << 4);  dst += step;
+		*dst = (int16_t)((samples & 0x0000003f) << 10); dst += step;
 
 		src += 3;
 	}
@@ -335,21 +327,17 @@ bjxa_inflate_6bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
 }
 
 static uint8_t
-bjxa_inflate_8bits(bjxa_decoder_t *dec, int16_t *dst, const uint8_t *src)
+bjxa_inflate_8bits(int16_t *dst, const uint8_t *src, unsigned step)
 {
-	unsigned n, chan;
 	uint8_t profile;
+	unsigned n;
 
-	assert(VALID_OBJ(dec, BJXA_DECODER_MAGIC));
-	assert(dec->channels == 1 || dec->channels == 2);
-
-	chan = dec->channels;
 	profile = *src;
 	src++;
 
 	for (n = BJXA_BLOCK_SAMPLES; n > 0; n--) {
 		*dst = (int16_t)(*src << 8);
-		dst += chan;
+		dst += step;
 		src++;
 	}
 
@@ -642,14 +630,15 @@ bjxa_decode(bjxa_decoder_t *dec, void *dst, size_t dst_len, const void *src,
 	    src_len >= fmt->block_size_xa) {
 
 		assert(pcm_block > 0);
-		profile = dec->inflate_cb(dec, dst_buf, src_ptr);
+		profile = dec->inflate_cb(dst_buf, src_ptr, dec->channels);
 		BJXA_TRY(bjxa_decode_inflated(dec, dst_buf, profile, 0));
 
 		src_ptr += dec->block_size;
 		src_len -= dec->block_size;
 
 		if (dec->channels == 2) {
-			profile = dec->inflate_cb(dec, dst_buf + 1, src_ptr);
+			profile = dec->inflate_cb(dst_buf + 1, src_ptr,
+			    dec->channels);
 			BJXA_TRY(bjxa_decode_inflated(dec, dst_buf + 1,
 			    profile, 1));
 			src_ptr += dec->block_size;
