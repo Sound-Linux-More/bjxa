@@ -20,21 +20,21 @@ include rpm.am
 
 # Binaries
 
-lib_LTLIBRARIES = libbjxa.la
+lib_LTLIBRARIES = src/libbjxa.la
 bin_PROGRAMS = bjxa
-include_HEADERS = bjxa.h
-noinst_HEADERS = bjxa_priv.h
+include_HEADERS = src/bjxa.h
+noinst_HEADERS = src/bjxa_priv.h
 
 libbjxa_la_LDFLAGS = -version-info 2:0:2
 libbjxa_la_DEPENDENCIES = $(include_HEADERS) $(noinst_HEADERS)
 
 if WITH_LD_VERSION_SCRIPT
-libbjxa_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libbjxa.map
-libbjxa_la_DEPENDENCIES += libbjxa.map
+libbjxa_la_LDFLAGS += -Wl,--version-script=$(srcdir)/src/libbjxa.map
+libbjxa_la_DEPENDENCIES += src/libbjxa.map
 endif
 
-bjxa_SOURCES = bjxa.c bjxa_decode.c bjxa_encode.c
-bjxa_LDADD = libbjxa.la
+bjxa_SOURCES = src/bjxa.c src/bjxa_decode.c src/bjxa_encode.c
+bjxa_LDADD = src/libbjxa.la
 
 # Packaging
 
@@ -76,7 +76,7 @@ DOCUMENTATION_SUFFIXES = \
 	.c .c.txt
 
 .c.c.txt:
-	$(AM_V_GEN) $(srcdir)/strip-c-source.sh $< $@
+	$(AM_V_GEN) $(srcdir)/src/strip-c-source.sh $< $@
 
 .1.rst.1 .3.rst.3 .5.rst.5:
 	$(AM_V_GEN) $(RST2MAN) --strict $< $@
@@ -84,7 +84,7 @@ DOCUMENTATION_SUFFIXES = \
 $(bjxa_3_links):
 	$(AM_V_GEN) printf ".so man3/%s\n" bjxa.3 >$@
 
-bjxa.3: bjxa_decode.c.txt bjxa_encode.c.txt
+bjxa.3: src/bjxa_decode.c.txt src/bjxa_encode.c.txt
 endif
 
 # C#
@@ -132,7 +132,7 @@ dist_check_SCRIPTS = \
 check_PROGRAMS = \
 	test/test_libbjxa_api
 
-test_test_libbjxa_api_LDADD = libbjxa.la
+test_test_libbjxa_api_LDADD = src/libbjxa.la
 
 TESTS = $(dist_check_SCRIPTS) $(check_PROGRAMS)
 
